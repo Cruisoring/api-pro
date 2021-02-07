@@ -3,7 +3,7 @@ import { DateHelper } from "./date-helper";
 export enum ObjectType {
     Null = 'Null',
     Undefined = 'Undefined',
-    NaN = 'NaN', //Not a number
+    NaN = 'NaN', //Not a Number
 
     Boolean = 'Boolean',
     Number = 'Number',
@@ -73,5 +73,43 @@ export abstract class TypeHelper {
         const remained: string[] = Object.keys(obj).filter((k) => !keys.includes(k));
 
         return TypeHelper.pick(obj, ...remained);
+    }
+
+    public static update<T extends {}>(template: T, updated: Partial<T>): T {
+        const copy: T = {...template, ...updated};
+        return copy;
+    }
+
+    // public static isEmptyObject(obj: object): boolean {
+    //     const keys: any[] = Object.keys(obj);
+    //     for (const key of keys) {
+    //         if (!this.isEmpty(TypeHelper.getValue(obj, key))) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
+
+    public static isEmpty(obj: any): boolean {
+        switch (TypeHelper.objectTypeOf(obj)) {
+            case ObjectType.Date:
+                return DateHelper.NullDateStrings.includes(obj);
+            case ObjectType.NaN:
+            case ObjectType.Null:
+            case ObjectType.Undefined:
+                return true;
+            case ObjectType.Number:
+            case ObjectType.BigInt:
+                return obj == 0;
+            case ObjectType.Boolean:
+                return !obj;
+            case ObjectType.String:
+            case ObjectType.Array:
+                return obj.length == 0;
+            case ObjectType.Object:
+                return Object.keys(obj).length == 0;
+            default:
+                return false;
+        }
     }
 };
