@@ -1,9 +1,8 @@
-import 'jest';
 import {ObjectHelper} from '../src/helpers/object-helper'
 
 describe('Test ObjectHelper', () => {
-    const testObj: any = {
-        fistName: 'Tom',
+    const customer: any = {
+        firstName: 'Tom',
         lastName: 'Visco',
         age: 24,
         address: {
@@ -12,9 +11,15 @@ describe('Test ObjectHelper', () => {
             postCode: '4123',
             state: 'QLD'
         }
-    }
+    };
+
     test('test valuePathsOf()', () => {
-        const paths: string[] = ObjectHelper.valuePathsOf(testObj);
+        const paths: string[] = ObjectHelper.valuePathsOf(customer);
         console.log(JSON.stringify(paths));
+    });
+
+    test('test getValue()', () => {
+        const state = ObjectHelper.getValue(customer, 'address.state');
+        expect(state).toEqual('QLD');
     });
 });
