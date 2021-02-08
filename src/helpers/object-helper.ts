@@ -2,15 +2,17 @@ import { NamedValueGetters, ValueGetter } from "value-getter";
 import { TypeHelper } from "./type-helper";
 
 export abstract class ObjectHelper {
+    public static PropertyNameCaseIgnored: boolean = true;
+
     public static readonly RootIndicator: string = '$';
-    public static readonly PathConnector: string = '.';
+    public static readonly PathConnector: string = '>';
     public static readonly FunctionIndicator: string = '()';
     public static readonly AlternativeConnector: string = '|';
     public static readonly SortKeyConnector: string = '+';
     public static readonly Missing: string = 'MISSING';
 
     public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)\[(?<index>\d+)\]\s*$/;
-    public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^]]*)\)\s*$/;
+    public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^)]*)\)\s*$/;
 
     public static valuePathsOf(source: any, path: string = ''): string[] {
         const keys: string[] = [...Object.keys(source)];
@@ -28,8 +30,16 @@ export abstract class ObjectHelper {
         return results;
     }
 
-    public static getValue(source: any, path: string, root: any = source, namedGetter: NamedValueGetters = {}): any {
-        const fragments: string[] = path.split(ObjectHelper.PathConnector);
+    public static valueByPropertyIgnoreCase(data: any, propertyName: string): any {
+        const lowerName: string = propertyName.trim().toLowerCase();
+        const matchedProperties: string[] = Object.keys(data).filter(k => k.toLowerCase() == lowerName);
+        if (matchedProperties.length == 0) return undefined;
+        else if (matchedProperties.length == 1) return data[matchedProperties[0]];
+        else throw TypeError(`Ambiguous properties matched: ${matchedProperties.join(', ')}`);
+    }
+
+    public static getValue(source: any, path: string, namedGetter: NamedValueGetters = {}, root: any = source): any {
+        const fragments: string[] = path.split(ObjectHelper.PathConnector).map(f => f.trim());
         let current: any = source;
         for (const fragment of fragments ) {
             try {
@@ -39,12 +49,21 @@ export abstract class ObjectHelper {
                 } else if (current[fragment] != undefined) {
                     // can go deeper and set current to that value:
                     current = current[fragment];
-                } else if (fragment.includes(ObjectHelper.AlternativeConnector)) {
+                    continue;                 
+                } else if (ObjectHelper.PropertyNameCaseIgnored) {
+                    const matchedValue: any = ObjectHelper.valueByPropertyIgnoreCase(current, fragment);
+                    if (matchedValue != undefined) {
+                        current = matchedValue;
+                        continue;
+                    }
+                }
+                
+                if (fragment.includes(ObjectHelper.AlternativeConnector)) {
                     // First, accept alternative paths with leading/ending SPACEs
                     const alterKeys: string[] = fragment.split(ObjectHelper.AlternativeConnector).map((a) => a.trim());
                     const allValues: any[] = [];
-                    for (const key in alterKeys) {
-                        const optionValue: any = ObjectHelper.getValue(current, key, root);
+                    for (const key of alterKeys) {
+                        const optionValue: any = ObjectHelper.getValue(current, key, namedGetter, root);
                         allValues.push(...optionValue);
                     }
                     current = allValues;
@@ -52,13 +71,13 @@ export abstract class ObjectHelper {
                     // Second, handle index based value retrieval
                     const match: RegExpExecArray = ObjectHelper.ArrayIndexRegex.exec(fragment)!;
                     const arrayKey: string = match!.groups!.key;
-                    const array: any = ObjectHelper.getValue(current, arrayKey, root);
+                    const array: any = ObjectHelper.getValue(current, arrayKey, namedGetter, root);
                     const index: string = match!.groups!.index;
-                    current = ObjectHelper.getValue(array, index, root);
+                    current = ObjectHelper.getValue(array, index, namedGetter, root);
                 } else if (fragment.startsWith(ObjectHelper.RootIndicator)) {
                     // Third, handle absolute path
                     const rootPath: string = path.substring(1);
-                    return ObjectHelper.getValue(root, rootPath);
+                    return ObjectHelper.getValue(root, rootPath, namedGetter);
                 } else if (ObjectHelper.FunctionArgsRegex.test(fragment)) {
                     // Finally, call named function with/without arguments
                     const match: RegExpExecArray = ObjectHelper.FunctionArgsRegex.exec(fragment)!;
@@ -68,10 +87,10 @@ export abstract class ObjectHelper {
                             const getter: ValueGetter = namedGetter[funcName];
                             const args: string = match.groups!.args;
                             if (args.length != 0) {
-                                const actualArgs: any[] = eval(args);
-                                current = getter(source, ...actualArgs);
+                                const actualArgs: any[] = eval(`[${args}]`);
+                                current = getter(current, ...actualArgs);
                             } else {
-                                current = getter(source);
+                                current = getter(current);
                             }                            
                         } catch (ex) {
                             console.error(`Get ${fragment} of ${path} by calling '${funcName}': ${ex.message}`);
