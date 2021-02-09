@@ -1,5 +1,6 @@
 import { NamedValueGetters, ValueGetter } from "value-getter";
-import { TypeHelper } from "./type-helper";
+import { DateHelper } from "./date-helper";
+import { ObjectType, TypeHelper } from "./type-helper";
 
 export abstract class ObjectHelper {
     public static PropertyNameCaseIgnored: boolean = true;
@@ -8,11 +9,51 @@ export abstract class ObjectHelper {
     public static readonly PathConnector: string = '>';
     public static readonly FunctionIndicator: string = '()';
     public static readonly AlternativeConnector: string = '|';
-    public static readonly SortKeyConnector: string = '+';
     public static readonly Missing: string = 'MISSING';
 
     public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)\[(?<index>\d+)\]\s*$/;
     public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^)]*)\)\s*$/;
+
+    //#region Sorting relationed functions
+    public static asSortedArray(rootArray: any,  ...sortKeys: string[]): any[] {
+        const elements: any[] = Array.from(rootArray);
+        elements.sort((e1, e2) => ObjectHelper.compareMultiple(e1, e2, ...sortKeys));
+        return elements;
+    }
+
+    public static compareMultiple(e1: any, e2: any, ...sortKeys: string[]): number {
+        let result: number = 0;
+        for (const key of sortKeys) {
+            const keyValue1: any = ObjectHelper.getValue(e1, key);
+            const keyValue2: any = ObjectHelper.getValue(e2, key);
+            result = ObjectHelper.compare(keyValue1, keyValue2);
+            if (result != 0) {
+                return result;
+            }
+        }
+        return result;
+    }
+
+    public static compare(e1: any, e2: any): number {
+        if (e1 == e2) {
+            return 0;}
+        else if (TypeHelper.objectTypeOf(e1) == ObjectType.Date && TypeHelper.objectTypeOf(e2) == ObjectType.Date) {
+            const date1: Date = DateHelper.asDate(e1);
+            const date2: Date = DateHelper.asDate(e2);
+            const dateDif: number = date1.valueOf() - date2.valueOf();
+            return dateDif;
+        } else if (e1 > e2) {
+            return 1;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public static compareReverse(e1: any, e2: any): number {
+        return -ObjectHelper.compare(e1, e2);
+    }
+    //#endregion
 
     public static valuePathsOf(source: any, path: string = ''): string[] {
         const keys: string[] = [...Object.keys(source)];
@@ -38,6 +79,7 @@ export abstract class ObjectHelper {
         else throw TypeError(`Ambiguous properties matched: ${matchedProperties.join(', ')}`);
     }
 
+    // TODO: split to caseInsensitive version
     public static getValue(source: any, path: string, namedGetter: NamedValueGetters = {}, root: any = source): any {
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map(f => f.trim());
         let current: any = source;
