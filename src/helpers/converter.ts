@@ -4,7 +4,7 @@ import { TypeHelper } from "./type-helper";
 
 export class Converter<T> {
     // TODO: with control options as Map<string, any>?
-    constructor(private mappings: Mappings<T>){}
+    constructor(private mappings: Mappings<T>) { }
 
     public convert(source: any): T {
         const result = Converter.convert(source, this.mappings);
@@ -47,7 +47,7 @@ export class Converter<T> {
                         const elemMappings: Mappings<any> = TypeHelper.skip(arrayMap, ...ArrayKeysTokens) as Mappings<any>;
                         // use it to get all elements
                         const mappedElements: unknown = rootArray.map((e: any) => Converter.convert(e, elemMappings, root));
-                        
+
                         // filter if FilterKey can be evaluated as a lambda
                         let filteredElements: any = mappedElements;
                         if (arrayMap.FilterKey) {
@@ -73,6 +73,5 @@ export class Converter<T> {
         }
 
         return result;
-
     }
 }

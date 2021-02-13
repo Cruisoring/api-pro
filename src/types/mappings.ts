@@ -7,7 +7,7 @@ export interface ArrayKeys {
 //Keep the keys of ArrayKeys interface for later use
 export const ArrayKeysTokens: (keyof ArrayKeys)[] = ['RootKey', 'FilterKey', 'SortKeys'];
 
-export function isOfArray(arg: any): arg is ArrayKeys {
+export function forArray(arg: any): arg is ArrayKeys {
     const result: boolean = arg && arg.RootKey && typeof arg.RootKey === 'string';
     return result;
 }
