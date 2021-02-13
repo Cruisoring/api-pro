@@ -1,9 +1,29 @@
+import { GetOptions } from "get-options";
 import { NamedValueGetters, ValueGetter } from "value-getter";
 import { DateHelper } from "./date-helper";
 import { ObjectType, TypeHelper } from "./type-helper";
 
 export abstract class ObjectHelper {
     public static PropertyNameCaseIgnored: boolean = true;
+    public static ReturnUndefinedIfMissing: boolean = true;
+    public static ThrowWhenFailed: boolean = true;
+    public static FailedMessageHead: string = 'Failed with: ';
+    public static NamedValueGetters: NamedValueGetters = {};
+
+    public static getDefaultGetOptions(): GetOptions {
+        return {
+            // try to ignore case of the propertyName if true
+            propertyNameCaseIgnored: ObjectHelper.PropertyNameCaseIgnored,
+            // undefined is returned if concerned property is missing when it is set to true:
+            returnUndefinedIfMissing: ObjectHelper.ReturnUndefinedIfMissing,
+            // throw Exception when get value of property failed
+            throwWhenFailed: ObjectHelper.ThrowWhenFailed,
+            // message head when getting value failed
+            failedMessageHead: ObjectHelper.FailedMessageHead,
+            // named functions with signature: (source: any, ...args: any[]) => any
+            namedValueGetters: ObjectHelper.NamedValueGetters,
+        };
+    }
 
     public static readonly RootIndicator: string = '$';
     public static readonly PathConnector: string = '>';
@@ -11,14 +31,14 @@ export abstract class ObjectHelper {
     public static readonly AlternativeConnector: string = '|';
     public static readonly Missing: string = 'MISSING';
 
-    public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)\[(?<index>\d+)\]\s*$/;
+    public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)?\[\s*(?<index>\d+)\s*\]\s*$/;
     public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^)]*)\)\s*$/;
 
     //#region Sorting relationed functions
-    public static asSortedArray(rootArray: any,  ...sortKeys: string[]): any[] {
+    public static asSortedArray(rootArray: any, ...sortKeys: string[]): any[] {
         const elements: any[] = Array.from(rootArray);
-        elements.sort((e1, e2) => ObjectHelper.compareMultiple(e1, e2, ...sortKeys));
-        return elements;
+        const sorted = elements.sort((e1, e2) => ObjectHelper.compareMultiple(e1, e2, ...sortKeys));
+        return sorted;
     }
 
     public static compareMultiple(e1: any, e2: any, ...sortKeys: string[]): number {
@@ -36,17 +56,18 @@ export abstract class ObjectHelper {
 
     public static compare(e1: any, e2: any): number {
         if (e1 == e2) {
-            return 0;}
+            return 0;
+        }
         else if (TypeHelper.objectTypeOf(e1) == ObjectType.Date && TypeHelper.objectTypeOf(e2) == ObjectType.Date) {
             const date1: Date = DateHelper.asDate(e1);
             const date2: Date = DateHelper.asDate(e2);
             const dateDif: number = date1.valueOf() - date2.valueOf();
             return dateDif;
-        } else if (e1 > e2) {
-            return 1;
-        }
-        else {
-            return -1;
+        } else if (TypeHelper.objectTypeOf(e1) == ObjectType.Number && TypeHelper.objectTypeOf(e2) == ObjectType.Number) {
+            const dif = (e1 as number) - (e2 as number);
+            return dif;
+        } else {
+            return e1 > e2 ? 1 : -1;
         }
     }
 
@@ -71,19 +92,31 @@ export abstract class ObjectHelper {
         return results;
     }
 
-    public static valueByPropertyIgnoreCase(data: any, propertyName: string): any {
+    public static valueByPropertyIgnoreCase(data: any, propertyName: string, returnUndefinedIfMissing: boolean = true, throwWhenFailed: boolean = true, failedMessageHead: string = ''): any {
         const lowerName: string = propertyName.trim().toLowerCase();
         const matchedProperties: string[] = Object.keys(data).filter(k => k.toLowerCase() == lowerName);
-        if (matchedProperties.length == 0) return undefined;
-        else if (matchedProperties.length == 1) return data[matchedProperties[0]];
-        else throw TypeError(`Ambiguous properties matched: ${matchedProperties.join(', ')}`);
+        if (matchedProperties.length == 0) {
+            if (returnUndefinedIfMissing) {
+                return undefined;
+            } else if (throwWhenFailed) {
+                throw TypeError(`Missing property: ${propertyName}`);
+            } else {
+                return failedMessageHead + propertyName;
+            }
+        } else if (matchedProperties.length == 1) {
+            return data[matchedProperties[0]];
+        } else if (throwWhenFailed) {
+            throw TypeError(`Ambiguous properties matched: ${matchedProperties.join(', ')}`);
+        } else {
+            return failedMessageHead + propertyName;
+        }
     }
 
-    // TODO: split to caseInsensitive version
-    public static getValue(source: any, path: string, namedGetter: NamedValueGetters = {}, root: any = source): any {
+    public static getValue(source: any, path: string, opts: Partial<GetOptions> = {}, root: any = source): any {
+        const options: GetOptions = { ...ObjectHelper.getDefaultGetOptions(), ...opts };
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map(f => f.trim());
         let current: any = source;
-        for (const fragment of fragments ) {
+        for (const fragment of fragments) {
             try {
                 if (current === null) {
                     // stop searching when current is null, return null immediately
@@ -91,21 +124,21 @@ export abstract class ObjectHelper {
                 } else if (current[fragment] != undefined) {
                     // can go deeper and set current to that value:
                     current = current[fragment];
-                    continue;                 
+                    continue;
                 } else if (ObjectHelper.PropertyNameCaseIgnored) {
-                    const matchedValue: any = ObjectHelper.valueByPropertyIgnoreCase(current, fragment);
+                    const matchedValue: any = ObjectHelper.valueByPropertyIgnoreCase(current, fragment, options.returnUndefinedIfMissing, options.throwWhenFailed, options.failedMessageHead);
                     if (matchedValue != undefined) {
                         current = matchedValue;
                         continue;
                     }
                 }
-                
+
                 if (fragment.includes(ObjectHelper.AlternativeConnector)) {
                     // First, accept alternative paths with leading/ending SPACEs
                     const alterKeys: string[] = fragment.split(ObjectHelper.AlternativeConnector).map((a) => a.trim());
                     const allValues: any[] = [];
                     for (const key of alterKeys) {
-                        const optionValue: any = ObjectHelper.getValue(current, key, namedGetter, root);
+                        const optionValue: any = ObjectHelper.getValue(current, key, options, root);
                         allValues.push(...optionValue);
                     }
                     current = allValues;
@@ -113,36 +146,50 @@ export abstract class ObjectHelper {
                     // Second, handle index based value retrieval
                     const match: RegExpExecArray = ObjectHelper.ArrayIndexRegex.exec(fragment)!;
                     const arrayKey: string = match!.groups!.key;
-                    const array: any = ObjectHelper.getValue(current, arrayKey, namedGetter, root);
+                    const array: any = arrayKey ? ObjectHelper.getValue(current, arrayKey, options, root) : current;
                     const index: string = match!.groups!.index;
-                    current = ObjectHelper.getValue(array, index, namedGetter, root);
+                    current = ObjectHelper.getValue(array, index, options, root);
                 } else if (fragment.startsWith(ObjectHelper.RootIndicator)) {
                     // Third, handle absolute path
                     const rootPath: string = path.substring(1);
-                    return ObjectHelper.getValue(root, rootPath, namedGetter);
+                    return ObjectHelper.getValue(root, rootPath, options);
                 } else if (ObjectHelper.FunctionArgsRegex.test(fragment)) {
                     // Finally, call named function with/without arguments
                     const match: RegExpExecArray = ObjectHelper.FunctionArgsRegex.exec(fragment)!;
                     const funcName: string = match.groups!.funcName;
-                    if (funcName in namedGetter) {
+                    if (funcName in options.namedValueGetters) {
                         try {
-                            const getter: ValueGetter = namedGetter[funcName];
+                            const getter: ValueGetter = options.namedValueGetters[funcName];
                             const args: string = match.groups!.args;
                             if (args.length != 0) {
                                 const actualArgs: any[] = eval(`[${args}]`);
                                 current = getter(current, ...actualArgs);
                             } else {
                                 current = getter(current);
-                            }                            
+                            }
                         } catch (ex) {
-                            console.error(`Get ${fragment} of ${path} by calling '${funcName}': ${ex.message}`);
-                            throw ex;
+                            if (options.throwWhenFailed) {
+                                throw ex;
+                            } else {
+                                console.error(`Get ${fragment} of ${path} by calling '${funcName}': ${ex.message}`);
+                                return options.failedMessageHead + `${fragment}: ${funcName} throws '${ex.message}'`;
+                            }
                         }
                     } else {
-                        throw TypeError(`No definition of func with name "${funcName}" to retrieve "${fragment}"`);
+                        if (options.throwWhenFailed) {
+                            throw TypeError(`No definition of func with name "${funcName}" to retrieve "${fragment}"`);
+                        } else {
+                            return options.failedMessageHead + `${fragment}: miss definition of function '${funcName}'`;
+                        }
                     }
                 } else {
-                    return undefined;
+                    if (options.returnUndefinedIfMissing) {
+                        return undefined;
+                    } else if (options.throwWhenFailed) {
+                        throw TypeError(`Missing property of ${fragment}`);
+                    } else {
+                        return options.failedMessageHead + `missing '${fragment}'`;
+                    }
                 }
             } catch (ex) {
                 console.error(`Failed to retrieve value of ${fragment}: ${ex.message}`);
