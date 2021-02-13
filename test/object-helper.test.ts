@@ -1,36 +1,5 @@
 import { ObjectHelper } from '../src/helpers/object-helper';
-
-const customer: any = {
-    firstName: 'Tom',
-    lastName: 'Visco',
-    age: 24,
-    address: {
-        line1: '12 Albert st',
-        suburb: 'Sunny coast',
-        postCode: '4123',
-        state: 'QLD',
-    },
-    discount: 0.8,
-    credit: 5,
-};
-
-const orders: any = [
-    { item: 'notebook', qty: 2, price: 2.78, gst: 0.56, totalWithGst: 6.12 },
-    { item: 'pencil', qty: 20, price: 0.22, gst: 0.44, totalWithGst: 4.84 },
-    { item: 'ruler', qty: 1, price: 1.78, gst: 0.18, totalWithGst: 1.96 },
-    { item: 'case', qty: 1, price: 12.78, gst: 1.28, totalWithGst: 14.06 },
-];
-
-const cancelled: any = [
-    { item: 'notebook', qty: 1, price: 2.78, gst: -0.28, totalWithGst: -3.06 },
-    { item: 'pencil', qty: 10, price: 0.22, gst: -0.22, totalWithGst: -2.42 },
-];
-
-const rawData = {
-    customer: customer,
-    purchased: orders,
-    cancelled: cancelled,
-};
+import {customer, orders, cancelled, rawData} from './data/data';
 
 describe('Test sorting', () => {
     test('sort orders by gst', (): void => {
@@ -41,7 +10,7 @@ describe('Test sorting', () => {
     });
 });
 
-describe('Test ObjectHelper', () => {
+describe('Test ObjectHelper with default configs', () => {
     test('test valueByPropertyIgnoreCase() with spaces in the paths', () => {
         const address = ObjectHelper.valueByPropertyIgnoreCase(customer, ' addreSS ');
         expect(address.state).toEqual('QLD');
@@ -73,9 +42,17 @@ describe('Test ObjectHelper', () => {
         expect(gst).toEqual(-0.22);
     });
 
-    test('test getValue() with alternative', () => {
-        const itemsLength = ObjectHelper.getValue(rawData, 'purchased | cAncelled > length');
+    test('test getValue() with andConnector', () => {
+        const itemsLength = ObjectHelper.getValue(rawData, 'purchased & cAncelled > length');
         expect(itemsLength).toEqual(6);
+    });
+
+    test('test getValue() with orConnector', () => {
+        const data = {item: 'apple', description: 'red big', note: '$1.1/per'}
+        let info = ObjectHelper.getValue(data, 'info | DESC | Description | note');
+        expect(info).toEqual('red big');
+        info = ObjectHelper.getValue(data, ' infomation | DESC ');
+        expect(info).toBeUndefined;
     });
 
     test('test getValue() with missing property', () => {
@@ -96,7 +73,7 @@ describe('Test ObjectHelper', () => {
                 items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
         };
 
-        const totalAmount = ObjectHelper.getValue(rawData, `purchased | cancelled > total(${discount}, ${credit})`, {
+        const totalAmount = ObjectHelper.getValue(rawData, `purchased & cancelled > total(${discount}, ${credit})`, {
             namedValueGetters: getters,
         });
         expect(totalAmount.toFixed(2)).toEqual('12.20');

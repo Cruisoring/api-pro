@@ -28,7 +28,8 @@ export abstract class ObjectHelper {
     public static readonly RootIndicator: string = '$';
     public static readonly PathConnector: string = '>';
     public static readonly FunctionIndicator: string = '()';
-    public static readonly AlternativeConnector: string = '|';
+    public static readonly AndConnector: string = '&';  // for array composed by all matched elements
+    public static readonly OrConnector: string = '|';   // for element matched first with any of the keys in order
     public static readonly Missing: string = 'MISSING';
 
     public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)?\[\s*(?<index>\d+)\s*\]\s*$/;
@@ -128,7 +129,7 @@ export abstract class ObjectHelper {
         const mergedOptions: GetOptions = { ...ObjectHelper.getDefaultGetOptions(), ...options };
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map((f) => f.trim());
         let current: any = source;
-        for (const fragment of fragments) {
+        for (let fragment of fragments) {
             try {
                 if (current === null) {
                     // stop searching when current is null, return null immediately
@@ -151,17 +152,35 @@ export abstract class ObjectHelper {
                     }
                 }
 
-                if (fragment.includes(ObjectHelper.AlternativeConnector)) {
-                    // First, accept alternative paths with leading/ending SPACEs
-                    const alterKeys: string[] = fragment.split(ObjectHelper.AlternativeConnector).map((a) => a.trim());
+                if (fragment.includes(ObjectHelper.AndConnector)) {
+                    // Firstly, adding outcomes of alternative paths regardless of leading/ending SPACEs
+                    const andKeys: string[] = fragment.split(ObjectHelper.AndConnector).map((a) => a.trim());
                     const allValues: any[] = [];
-                    for (const key of alterKeys) {
+                    for (const key of andKeys) {
                         const optionValue: any = ObjectHelper.getValue(current, key, mergedOptions, root);
-                        allValues.push(...optionValue);
+                        if (optionValue) {
+                            if (TypeHelper.isArray(optionValue)) {
+                                allValues.push(...optionValue);
+                            } else {
+                                allValues.push(optionValue);
+                            }
+                        }
                     }
                     current = allValues;
+                } else if (fragment.includes(ObjectHelper.OrConnector)) {
+                    // Secondly, accept single matched element denoted by any key regardless of leading/ending SPACEs
+                    const orKeys: string[] = fragment.split(ObjectHelper.OrConnector).map((a) => a.trim());
+                    let firstMatched: any = undefined;
+                    for (const key of orKeys) {
+                        const optionValue: any = ObjectHelper.getValue(current, key, mergedOptions, root);
+                        if (optionValue) {
+                            firstMatched = optionValue;
+                            break;
+                        }
+                    }
+                    current = firstMatched;
                 } else if (ObjectHelper.ArrayIndexRegex.test(fragment)) {
-                    // Second, handle index based value retrieval
+                    // Thirdly, handle index based value retrieval
                     const match: RegExpExecArray = ObjectHelper.ArrayIndexRegex.exec(fragment)!;
                     const arrayKey: string = match!.groups!.key;
                     const array: any = arrayKey
@@ -170,7 +189,7 @@ export abstract class ObjectHelper {
                     const index: string = match!.groups!.index;
                     current = ObjectHelper.getValue(array, index, mergedOptions, root);
                 } else if (fragment.startsWith(ObjectHelper.RootIndicator)) {
-                    // Third, handle absolute path
+                    // Fourthly, handle absolute path
                     const rootPath: string = path.substring(1);
                     return ObjectHelper.getValue(root, rootPath, mergedOptions);
                 } else if (ObjectHelper.FunctionArgsRegex.test(fragment)) {

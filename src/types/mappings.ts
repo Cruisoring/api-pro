@@ -1,11 +1,11 @@
 export interface ArrayKeys {
     RootKey: string; // Key to get the source array
-    FilterKey: string | undefined; // If defined, key to filter the elements of source array
-    SortKeys: string; // Key or Keys to sort the elements of source array, use '+' to join keys
+    SortKeys?: string; // Key or Keys to sort the elements of source array, use '+' to join keys
+    FilterLambda?: string; // If defined, lambda expression to filter the mapped elements
 }
 
 //Keep the keys of ArrayKeys interface for later use
-export const ArrayKeysTokens: (keyof ArrayKeys)[] = ['RootKey', 'FilterKey', 'SortKeys'];
+export const ArrayKeysTokens: (keyof ArrayKeys)[] = ['RootKey', 'FilterLambda', 'SortKeys'];
 
 export function forArray(arg: any): arg is ArrayKeys {
     const result: boolean = arg && arg.RootKey && typeof arg.RootKey === 'string';

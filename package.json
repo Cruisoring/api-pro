@@ -49,17 +49,6 @@
     "lerna": "^3.22.1",
     "yarn": "^1.22.10"
   },
-  "jest": {
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "testRegex": "(/test/.*.test.ts|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ]
-  },
   "jest-junit": {
     "outputDirectory": "reports",
     "outputName": "alltest.xml",
