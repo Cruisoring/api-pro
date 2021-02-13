@@ -32,11 +32,16 @@ module.exports = {
         "ignoreParameters": true
       }
     ],
-    // 'prettier/prettier': [
-    //   'error',
-    //   {
-    //     endOfLine: 'auto',
-    //   },
-    // ],
+    "max-depth": [WARN, 8],
+    "max-len": [2, { "code": 80, "tabWidth": 4, "ignoreUrls": true }],
+    "max-nested-callbacks": [WARN, 8],
+    "max-params": [WARN, 8],
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
   },
+
 };

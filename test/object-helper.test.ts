@@ -1,4 +1,4 @@
-import { ObjectHelper } from '../src/helpers/object-helper'
+import { ObjectHelper } from '../src/helpers/object-helper';
 
 const customer: any = {
     firstName: 'Tom',
@@ -8,9 +8,9 @@ const customer: any = {
         line1: '12 Albert st',
         suburb: 'Sunny coast',
         postCode: '4123',
-        state: 'QLD'
+        state: 'QLD',
     },
-    discount: 0.80,
+    discount: 0.8,
     credit: 5,
 };
 
@@ -19,42 +19,41 @@ const orders: any = [
     { item: 'pencil', qty: 20, price: 0.22, gst: 0.44, totalWithGst: 4.84 },
     { item: 'ruler', qty: 1, price: 1.78, gst: 0.18, totalWithGst: 1.96 },
     { item: 'case', qty: 1, price: 12.78, gst: 1.28, totalWithGst: 14.06 },
-]
+];
 
 const cancelled: any = [
     { item: 'notebook', qty: 1, price: 2.78, gst: -0.28, totalWithGst: -3.06 },
     { item: 'pencil', qty: 10, price: 0.22, gst: -0.22, totalWithGst: -2.42 },
-]
+];
 
 const rawData = {
     customer: customer,
     purchased: orders,
     cancelled: cancelled,
-}
+};
 
 describe('Test sorting', () => {
-    test('sort orders by gst', (): void=> {
+    test('sort orders by gst', (): void => {
         const sorted = ObjectHelper.asSortedArray(orders, 'GST');
         sorted.reverse();
-        const sortedTotals = sorted.map(o => o.totalWithGst);
+        const sortedTotals = sorted.map((o) => o.totalWithGst);
         expect(sortedTotals).toEqual([14.06, 6.12, 4.84, 1.96]);
-    })
-})
+    });
+});
 
 describe('Test ObjectHelper', () => {
-
     test('test valueByPropertyIgnoreCase() with spaces in the paths', () => {
-        const address = ObjectHelper.valueByPropertyIgnoreCase(customer, ' addreSS ')
+        const address = ObjectHelper.valueByPropertyIgnoreCase(customer, ' addreSS ');
         expect(address.state).toEqual('QLD');
-    })
+    });
 
     test('test valueByPropertyIgnoreCase() throws with ambiguity', () => {
         const ambiguity = { name: 'tom', NAME: 'TOM', Name: 'Tom' };
-        const Tom = ObjectHelper.getValue(ambiguity, ' Name ')
+        const Tom = ObjectHelper.getValue(ambiguity, ' Name ');
         expect(Tom).toEqual('Tom');
         const t = () => ObjectHelper.valueByPropertyIgnoreCase(ambiguity, 'NaME');
-        expect(t).toThrow('Ambiguous properties matched: name, NAME, Name')
-    })
+        expect(t).toThrow('Ambiguous properties matched: name, NAME, Name');
+    });
 
     test('test valuePathsOf()', () => {
         const paths: string[] = ObjectHelper.valuePathsOf(customer);
@@ -71,7 +70,7 @@ describe('Test ObjectHelper', () => {
         expect(price).toEqual(1.78);
 
         const gst = ObjectHelper.getValue(cancelled, '[1] > GST');
-        expect(gst).toEqual(-0.22)
+        expect(gst).toEqual(-0.22);
     });
 
     test('test getValue() with alternative', () => {
@@ -86,16 +85,16 @@ describe('Test ObjectHelper', () => {
         expect(missing).toEqual(undefined);
         missing = ObjectHelper.getValue(rawData, 'purchased [5]');
         expect(missing).toEqual(undefined);
-    })
+    });
 
     test('test getValue() with named function', () => {
         const discount: number = ObjectHelper.getValue(rawData, 'customer>discount');
         const credit: number = ObjectHelper.getValue(rawData, 'customer>credit') ?? 0;
         const getters = {
             //function to sum totalWithGst then multiple discount in percentages then minus credit
-            'total': (items: any[], disc: any, credit: any) =>
+            total: (items: any[], disc: any, credit: any) =>
                 items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
-        }
+        };
 
         const totalAmount = ObjectHelper.getValue(rawData, `purchased | cancelled > total(${discount}, ${credit})`, {
             namedValueGetters: getters,
@@ -104,11 +103,9 @@ describe('Test ObjectHelper', () => {
     });
 });
 
-
 describe('Test ObjectHelper with ThrowWhenMappingFailed set to FALSE', () => {
-
     test('valueByPropertyIgnoreCase() returns message when property missing', () => {
         const gender = ObjectHelper.valueByPropertyIgnoreCase(customer, 'gender', false, false);
         expect(typeof gender == 'string').toBeTruthy();
     });
-})
+});

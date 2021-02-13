@@ -1,4 +1,4 @@
-import { Product } from "./product";
+import { Product } from './product';
 
 export class ShoppingCartItem {
     itemId: string;
@@ -10,7 +10,7 @@ export class ShoppingCartItem {
         LOOKS like a ShoppingCartItem type.
     */
     constructor(init?: Partial<ShoppingCartItem>) {
-        Object.assign(this, init);//copy everything from init into this instance of ShoppingCartItem.
+        Object.assign(this, init); //copy everything from init into this instance of ShoppingCartItem.
     }
 
     //get price based on quantity and price per item.

@@ -1,4 +1,4 @@
-import { DateHelper } from "./date-helper";
+import { DateHelper } from './date-helper';
 
 export enum ObjectType {
     Null = 'Null',
@@ -61,7 +61,7 @@ export abstract class TypeHelper {
     }
 
     public static pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K> {
-        const copy : Pick<T, K> = keys.reduce((result: any, key: K) => {
+        const copy: Pick<T, K> = keys.reduce((result: any, key: K) => {
             result[key] = obj[key];
             return result;
         }, {});
@@ -76,7 +76,7 @@ export abstract class TypeHelper {
     }
 
     public static update<T extends {}>(template: T, updated: Partial<T>): T {
-        const copy: T = {...template, ...updated};
+        const copy: T = { ...template, ...updated };
         return copy;
     }
 
@@ -112,4 +112,4 @@ export abstract class TypeHelper {
                 return false;
         }
     }
-};
+}

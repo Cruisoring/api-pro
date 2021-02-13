@@ -1,5 +1,5 @@
-import { Address } from "./address";
-import { Customer } from "./customer";
+import { Address } from './address';
+import { Customer } from './customer';
 
 export interface Shipping {
     from: string;

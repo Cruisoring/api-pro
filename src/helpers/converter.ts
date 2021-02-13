@@ -1,10 +1,10 @@
-import { ArrayKeysTokens, ArrayMappings, Mappings } from "mappings";
-import { ObjectHelper } from "./object-helper";
-import { TypeHelper } from "./type-helper";
+import { ArrayKeysTokens, ArrayMappings, Mappings } from 'mappings';
+import { ObjectHelper } from './object-helper';
+import { TypeHelper } from './type-helper';
 
 export class Converter<T> {
     // TODO: with control options as Map<string, any>?
-    constructor(private mappings: Mappings<T>) { }
+    constructor(private mappings: Mappings<T>) {}
 
     public convert(source: any): T {
         const result = Converter.convert(source, this.mappings);
@@ -44,9 +44,14 @@ export class Converter<T> {
                         result[key] = ([] as unknown) as T[typeof key];
                     } else {
                         // skip keys of ArrayKeys to get Mappsings of elements
-                        const elemMappings: Mappings<any> = TypeHelper.skip(arrayMap, ...ArrayKeysTokens) as Mappings<any>;
+                        const elemMappings: Mappings<any> = TypeHelper.skip(
+                            arrayMap,
+                            ...ArrayKeysTokens,
+                        ) as Mappings<any>;
                         // use it to get all elements
-                        const mappedElements: unknown = rootArray.map((e: any) => Converter.convert(e, elemMappings, root));
+                        const mappedElements: unknown = rootArray.map((e: any) =>
+                            Converter.convert(e, elemMappings, root),
+                        );
 
                         // filter if FilterKey can be evaluated as a lambda
                         let filteredElements: any = mappedElements;
@@ -58,7 +63,7 @@ export class Converter<T> {
                         // then sort the maped items with the shared keys
                         const sortedElements: unknown = ObjectHelper.asSortedArray(
                             filteredElements,
-                            ...arrayMap.SortKeys.split(',').map(k => k.trim()),
+                            ...arrayMap.SortKeys.split(',').map((k) => k.trim()),
                         );
                         result[key] = sortedElements as T[typeof key];
                     }

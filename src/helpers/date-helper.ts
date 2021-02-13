@@ -17,8 +17,7 @@ export abstract class DateHelper {
     ];
 
     public static isDateString(value: string): boolean {
-        return this.NullDateStrings.includes(value) ||
-            DateHelper.expectedDateFormats.some((f) => f.test(value));
+        return this.NullDateStrings.includes(value) || DateHelper.expectedDateFormats.some((f) => f.test(value));
     }
 
     public static asDate(dateString: string): Date {

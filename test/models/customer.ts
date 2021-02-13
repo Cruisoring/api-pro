@@ -1,5 +1,5 @@
-import { Gender } from "../enums/gender";
-import { Address } from "./address";
+import { Gender } from '../enums/gender';
+import { Address } from './address';
 
 export interface Customer {
     first_name: string;
@@ -13,4 +13,3 @@ export interface Customer {
     homeAddress?: Address;
     workAddress?: Address;
 }
-

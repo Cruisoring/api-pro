@@ -1,4 +1,4 @@
-import { State } from "../enums/state";
+import { State } from '../enums/state';
 
 export interface Address {
     addressLine1: string;
