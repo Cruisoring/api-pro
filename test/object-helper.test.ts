@@ -8,6 +8,19 @@ describe('Test sorting', () => {
         const sortedTotals = sorted.map((o) => o.totalWithGst);
         expect(sortedTotals).toEqual([14.06, 6.12, 4.84, 1.96]);
     });
+
+    const items = [...cancelled, ...orders];
+    test('sort by date then item', () => {
+        const sorted = ObjectHelper.asSortedArray(items, 'Date', 'Item');
+        const sortedTotals = sorted.map((i) => i.totalWithGst);
+        expect(sortedTotals).toEqual([14.06, 4.84, 1.96, -2.42, 6.12, -3.06]);
+    });
+
+    test('sort by date then item descending', () => {
+        const sorted = ObjectHelper.asSortedArray(items, '+Date', '-Item');
+        const sortedTotals = sorted.map((i) => i.totalWithGst);
+        expect(sortedTotals).toEqual([1.96, 4.84, 14.06, -2.42, 6.12, -3.06]);
+    });
 });
 
 describe('Test ObjectHelper with default configs', () => {

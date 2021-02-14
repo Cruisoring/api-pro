@@ -1,4 +1,5 @@
 import { GetOptions } from 'get-options';
+import { AscendingSortIndictor, DescendingSortIndictor } from '../types/mappings';
 import { NamedValueGetters, ValueGetter } from 'value-getter';
 import { DateHelper } from './date-helper';
 import { ObjectType, TypeHelper } from './type-helper';
@@ -28,8 +29,8 @@ export abstract class ObjectHelper {
     public static readonly RootIndicator: string = '$';
     public static readonly PathConnector: string = '>';
     public static readonly FunctionIndicator: string = '()';
-    public static readonly AndConnector: string = '&';  // for array composed by all matched elements
-    public static readonly OrConnector: string = '|';   // for element matched first with any of the keys in order
+    public static readonly AndConnector: string = '&'; // for array composed by all matched elements
+    public static readonly OrConnector: string = '|'; // for element matched first with any of the keys in order
     public static readonly Missing: string = 'MISSING';
 
     public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)?\[\s*(?<index>\d+)\s*\]\s*$/;
@@ -38,21 +39,25 @@ export abstract class ObjectHelper {
     //#region Sorting relationed functions
     public static asSortedArray(rootArray: any, ...sortKeys: string[]): any[] {
         const elements: any[] = Array.from(rootArray);
-        const sorted = elements.sort((e1, e2) => ObjectHelper.compareMultiple(e1, e2, ...sortKeys));
+        const keys: string[] = sortKeys.map((k) => k.trim());
+        const sorted = elements.sort((e1, e2) => ObjectHelper.compareMultiple(e1, e2, ...keys));
         return sorted;
     }
 
     public static compareMultiple(e1: any, e2: any, ...sortKeys: string[]): number {
         let result: number = 0;
+        let descSorting: boolean = false;
         for (const key of sortKeys) {
-            const keyValue1: any = ObjectHelper.getValue(e1, key);
-            const keyValue2: any = ObjectHelper.getValue(e2, key);
+            descSorting = key.startsWith(DescendingSortIndictor);
+            const valueKey = descSorting || key.startsWith(AscendingSortIndictor) ? key.substring(1) : key;
+            const keyValue1: any = ObjectHelper.getValue(e1, valueKey);
+            const keyValue2: any = ObjectHelper.getValue(e2, valueKey);
             result = ObjectHelper.compare(keyValue1, keyValue2);
             if (result != 0) {
-                return result;
+                return descSorting ? -result : result;
             }
         }
-        return result;
+        return descSorting ? -result : result;
     }
 
     public static compare(e1: any, e2: any): number {
@@ -130,7 +135,12 @@ export abstract class ObjectHelper {
         return this.getValue(source, path, mergedOptions);
     }
 
-    public static getValue(source: any, path: string, options: GetOptions|undefined = undefined, root: any = source): any {
+    public static getValue(
+        source: any,
+        path: string,
+        options: GetOptions | undefined = undefined,
+        root: any = source,
+    ): any {
         options = options ?? ObjectHelper.getDefaultGetOptions();
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map((f) => f.trim());
         let current: any = source;
@@ -188,9 +198,7 @@ export abstract class ObjectHelper {
                     // Thirdly, handle index based value retrieval
                     const match: RegExpExecArray = ObjectHelper.ArrayIndexRegex.exec(fragment)!;
                     const arrayKey: string = match!.groups!.key;
-                    const array: any = arrayKey
-                        ? ObjectHelper.getValue(current, arrayKey, options, root)
-                        : current;
+                    const array: any = arrayKey ? ObjectHelper.getValue(current, arrayKey, options, root) : current;
                     const index: string = match!.groups!.index;
                     current = ObjectHelper.getValue(array, index, options, root);
                 } else if (fragment.startsWith(ObjectHelper.RootIndicator)) {
@@ -216,19 +224,14 @@ export abstract class ObjectHelper {
                                 throw ex;
                             } else {
                                 console.error(`Get ${fragment} of ${path} by calling '${funcName}': ${ex.message}`);
-                                return (
-                                    options.failedMessageHead + `${fragment}: ${funcName} throws '${ex.message}'`
-                                );
+                                return options.failedMessageHead + `${fragment}: ${funcName} throws '${ex.message}'`;
                             }
                         }
                     } else {
                         if (options.throwWhenFailed) {
                             throw TypeError(`No definition of func with name "${funcName}" to retrieve "${fragment}"`);
                         } else {
-                            return (
-                                options.failedMessageHead +
-                                `${fragment}: miss definition of function '${funcName}'`
-                            );
+                            return options.failedMessageHead + `${fragment}: miss definition of function '${funcName}'`;
                         }
                     }
                 } else {
