@@ -121,12 +121,17 @@ export abstract class ObjectHelper {
         }
     }
 
-    public static getValue(source: any, path: string, options: Partial<GetOptions> = {}, root: any = source): any {
+    public static getValueWithOptions(source: any, path: string, options: Partial<GetOptions> = {}): any {
         options.namedValueGetters = {
             ...ObjectHelper.getDefaultGetOptions().namedValueGetters,
             ...options.namedValueGetters,
         };
         const mergedOptions: GetOptions = { ...ObjectHelper.getDefaultGetOptions(), ...options };
+        return this.getValue(source, path, mergedOptions);
+    }
+
+    public static getValue(source: any, path: string, options: GetOptions|undefined = undefined, root: any = source): any {
+        options = options ?? ObjectHelper.getDefaultGetOptions();
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map((f) => f.trim());
         let current: any = source;
         for (let fragment of fragments) {
@@ -142,9 +147,9 @@ export abstract class ObjectHelper {
                     const matchedValue: any = ObjectHelper.valueByPropertyIgnoreCase(
                         current,
                         fragment,
-                        mergedOptions.returnUndefinedIfMissing,
-                        mergedOptions.throwWhenFailed,
-                        mergedOptions.failedMessageHead,
+                        options.returnUndefinedIfMissing,
+                        options.throwWhenFailed,
+                        options.failedMessageHead,
                     );
                     if (matchedValue != undefined) {
                         current = matchedValue;
@@ -157,7 +162,7 @@ export abstract class ObjectHelper {
                     const andKeys: string[] = fragment.split(ObjectHelper.AndConnector).map((a) => a.trim());
                     const allValues: any[] = [];
                     for (const key of andKeys) {
-                        const optionValue: any = ObjectHelper.getValue(current, key, mergedOptions, root);
+                        const optionValue: any = ObjectHelper.getValue(current, key, options, root);
                         if (optionValue) {
                             if (TypeHelper.isArray(optionValue)) {
                                 allValues.push(...optionValue);
@@ -172,7 +177,7 @@ export abstract class ObjectHelper {
                     const orKeys: string[] = fragment.split(ObjectHelper.OrConnector).map((a) => a.trim());
                     let firstMatched: any = undefined;
                     for (const key of orKeys) {
-                        const optionValue: any = ObjectHelper.getValue(current, key, mergedOptions, root);
+                        const optionValue: any = ObjectHelper.getValue(current, key, options, root);
                         if (optionValue) {
                             firstMatched = optionValue;
                             break;
@@ -184,21 +189,21 @@ export abstract class ObjectHelper {
                     const match: RegExpExecArray = ObjectHelper.ArrayIndexRegex.exec(fragment)!;
                     const arrayKey: string = match!.groups!.key;
                     const array: any = arrayKey
-                        ? ObjectHelper.getValue(current, arrayKey, mergedOptions, root)
+                        ? ObjectHelper.getValue(current, arrayKey, options, root)
                         : current;
                     const index: string = match!.groups!.index;
-                    current = ObjectHelper.getValue(array, index, mergedOptions, root);
+                    current = ObjectHelper.getValue(array, index, options, root);
                 } else if (fragment.startsWith(ObjectHelper.RootIndicator)) {
                     // Fourthly, handle absolute path
                     const rootPath: string = path.substring(1);
-                    return ObjectHelper.getValue(root, rootPath, mergedOptions);
+                    return ObjectHelper.getValue(root, rootPath, options);
                 } else if (ObjectHelper.FunctionArgsRegex.test(fragment)) {
                     // Finally, call named function with/without arguments
                     const match: RegExpExecArray = ObjectHelper.FunctionArgsRegex.exec(fragment)!;
                     const funcName: string = match.groups!.funcName;
-                    if (funcName in mergedOptions.namedValueGetters) {
+                    if (funcName in options.namedValueGetters) {
                         try {
-                            const getter: ValueGetter = mergedOptions.namedValueGetters[funcName];
+                            const getter: ValueGetter = options.namedValueGetters[funcName];
                             const args: string = match.groups!.args;
                             if (args.length != 0) {
                                 const actualArgs: any[] = eval(`[${args}]`);
@@ -207,32 +212,32 @@ export abstract class ObjectHelper {
                                 current = getter(current);
                             }
                         } catch (ex) {
-                            if (mergedOptions.throwWhenFailed) {
+                            if (options.throwWhenFailed) {
                                 throw ex;
                             } else {
                                 console.error(`Get ${fragment} of ${path} by calling '${funcName}': ${ex.message}`);
                                 return (
-                                    mergedOptions.failedMessageHead + `${fragment}: ${funcName} throws '${ex.message}'`
+                                    options.failedMessageHead + `${fragment}: ${funcName} throws '${ex.message}'`
                                 );
                             }
                         }
                     } else {
-                        if (mergedOptions.throwWhenFailed) {
+                        if (options.throwWhenFailed) {
                             throw TypeError(`No definition of func with name "${funcName}" to retrieve "${fragment}"`);
                         } else {
                             return (
-                                mergedOptions.failedMessageHead +
+                                options.failedMessageHead +
                                 `${fragment}: miss definition of function '${funcName}'`
                             );
                         }
                     }
                 } else {
-                    if (mergedOptions.returnUndefinedIfMissing) {
+                    if (options.returnUndefinedIfMissing) {
                         return undefined;
-                    } else if (mergedOptions.throwWhenFailed) {
+                    } else if (options.throwWhenFailed) {
                         throw TypeError(`Missing property of ${fragment}`);
                     } else {
-                        return mergedOptions.failedMessageHead + `missing '${fragment}'`;
+                        return options.failedMessageHead + `missing '${fragment}'`;
                     }
                 }
             } catch (ex) {

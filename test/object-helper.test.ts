@@ -55,6 +55,13 @@ describe('Test ObjectHelper with default configs', () => {
         expect(info).toBeUndefined;
     });
 
+    test('test getValue() with both AndConnector Ond orConnector', () => {
+        let info = ObjectHelper.getValue(rawData, 'purchased & cAncelled > [2]> info | DESC | Description | note');
+        expect(info).toEqual('nice looking ruler');
+        info = ObjectHelper.getValue(rawData, 'purchased & cAncelled > [4]> info | DESC |NOTE | item');
+        expect(info).toEqual('wrong quantity entered');
+    });
+
     test('test getValue() with missing property', () => {
         let missing = ObjectHelper.getValue(rawData, 'noSuchField');
         expect(missing).toEqual(undefined);
@@ -73,7 +80,7 @@ describe('Test ObjectHelper with default configs', () => {
                 items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
         };
 
-        const totalAmount = ObjectHelper.getValue(rawData, `purchased & cancelled > total(${discount}, ${credit})`, {
+        const totalAmount = ObjectHelper.getValueWithOptions(rawData, `purchased & cancelled > total(${discount}, ${credit})`, {
             namedValueGetters: getters,
         });
         expect(totalAmount.toFixed(2)).toEqual('12.20');

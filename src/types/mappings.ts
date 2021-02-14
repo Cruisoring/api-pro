@@ -4,6 +4,10 @@ export interface ArrayKeys {
     FilterLambda?: string; // If defined, lambda expression to filter the mapped elements
 }
 
+export const SortKeySeparator = '|';
+export const DescendingSortIndictor = '-';
+export const AscendingSortIndictor = '+';
+
 //Keep the keys of ArrayKeys interface for later use
 export const ArrayKeysTokens: (keyof ArrayKeys)[] = ['RootKey', 'FilterLambda', 'SortKeys'];
 
