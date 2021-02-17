@@ -1,4 +1,6 @@
+import { ArrayKeysTokens, ArrayMappings, isArrayMappings, Mappings } from '../types/mappings';
 import { DateHelper } from './date-helper';
+import { ObjectHelper } from './object-helper';
 
 export enum ObjectType {
     Null = 'Null',
@@ -78,6 +80,43 @@ export abstract class TypeHelper {
     public static update<T extends {}>(template: T, updated: Partial<T>): T {
         const copy: T = { ...template, ...updated };
         return copy;
+    }
+
+    /**
+     * If input Mappings<T> is an ArrayMappings<T>, use the prefix as the RootKey directly,
+     *      otherwise, build a new Mappigns of type T with prefixed leading paths of the elements.
+     * @param mappings - Mappings of type T to be inserted with prefix.
+     * @param prefix - path leading to the concerned elements, fragments are seperated by '>', like 'a>b>c'
+     */
+    public static withPrefix<T>(mappings: Mappings<T>, prefix: string): Mappings<T> {
+        prefix = prefix.trim();
+        const leading: string = prefix.endsWith(ObjectHelper.PathConnector)
+            ? prefix
+            : prefix + ObjectHelper.PathConnector;
+        if (leading.length == 1) {
+            // no prefix, return original mappings directly
+            return mappings;
+        } else if (isArrayMappings(mappings)) {
+            // only ned to update RootKey with leading prefix
+            const updatedArrayMappings: ArrayMappings<T> = { ...mappings };
+            updatedArrayMappings.RootKey = leading;
+            return updatedArrayMappings;
+        }
+
+        const result: Mappings<T> = {} as Mappings<T>;
+        const keys: string[] = Object.keys(mappings);
+        const arrayKeysTokens: string[] = [...ArrayKeysTokens];
+        for (const property of keys) {
+            const key: keyof T = property as keyof T;
+            const mapping: string | Mappings<T[typeof key]> = mappings[key];
+            if (typeof mapping === 'string') {
+                result[key] = `${leading}${mapping}`;
+            } else {
+                // mapping is an embedded Mappings<U>
+                result[key] = TypeHelper.withPrefix(mapping, leading);
+            }
+        }
+        return result;
     }
 
     // public static isEmptyObject(obj: object): boolean {

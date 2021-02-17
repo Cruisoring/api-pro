@@ -11,7 +11,7 @@ export const AscendingSortIndictor = '+';
 //Keep the keys of ArrayKeys interface for later use
 export const ArrayKeysTokens: (keyof ArrayKeys)[] = ['RootKey', 'FilterLambda', 'SortKeys'];
 
-export function forArray(arg: any): arg is ArrayKeys {
+export function isArrayMappings(arg: any): arg is ArrayKeys {
     const result: boolean = arg && arg.RootKey && typeof arg.RootKey === 'string';
     return result;
 }

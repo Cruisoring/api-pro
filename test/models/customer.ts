@@ -1,7 +1,8 @@
+import { Mappings } from '../../src/types/mappings';
 import { Gender } from '../enums/gender';
-import { Address } from './address';
+import { AddressRaw, AddressMappings, Address } from './address';
 
-export interface Customer {
+export interface CustomerRaw {
     first_name: string;
     last_name?: string;
     age?: number;
@@ -10,6 +11,25 @@ export interface Customer {
     mobile: string | number;
     workPhone?: string | number;
     homePhone?: string | number;
-    homeAddress?: Address;
-    workAddress?: Address;
+    address?: AddressRaw;
+}
+
+export interface Customer {
+    firstName: string;
+    lastName: string;
+    age: number;
+    gender: string;
+    email: string;
+    phone: string | number;
+    address: Address;
+}
+
+export const CustomerMappings: Mappings<Customer> = {
+    firstName: 'first_name',
+    lastName: 'last_name',
+    age: '',
+    gender: '',
+    email: '',
+    phone: 'mobile | workphone | homephone',
+    address: AddressMappings,
 }

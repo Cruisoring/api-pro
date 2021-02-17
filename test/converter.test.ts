@@ -1,6 +1,6 @@
 import { ArrayMappings, Mappings } from '../src/types/mappings';
 import { Converter } from '../src/helpers/converter';
-import { customer, orders, cancelled, rawData } from './data/data';
+import { customer, rawData } from './data/data';
 
 interface profile {
     givenName: string;

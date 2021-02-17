@@ -1,13 +1,13 @@
-import { GetOptions } from 'get-options';
+import { GetOptions } from '../types/get-options';
 import { AscendingSortIndictor, DescendingSortIndictor } from '../types/mappings';
-import { NamedValueGetters, ValueGetter } from 'value-getter';
+import { NamedValueGetters, ValueGetter } from '../types/value-getter';
 import { DateHelper } from './date-helper';
 import { ObjectType, TypeHelper } from './type-helper';
 
 export abstract class ObjectHelper {
     public static PropertyNameCaseIgnored: boolean = true;
     public static ReturnUndefinedIfMissing: boolean = true;
-    public static ThrowWhenFailed: boolean = true;
+    public static ThrowWhenFailed: boolean = false;
     public static FailedMessageHead: string = 'Failed with: ';
     public static NamedValueGetters: NamedValueGetters = {};
 

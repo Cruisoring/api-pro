@@ -1,4 +1,4 @@
-import { GetOptions } from 'get-options';
+import { GetOptions } from '../types/get-options';
 import { ArrayKeysTokens, ArrayMappings, Mappings, SortKeySeparator } from '../types/mappings';
 import { ObjectHelper } from './object-helper';
 import { TypeHelper } from './type-helper';
@@ -88,7 +88,8 @@ export class Converter<T> {
                     }
                 } else {
                     // convert when the child is of complex object
-                    result[key] = this.convert(source, mapping as Mappings<T[typeof key]>, options, root);
+                    const child = source[key] ?? source;
+                    result[key] = this.convert(child, mapping as Mappings<T[typeof key]>, options, root);
                 }
             } catch (ex) {
                 console.error(`With property '${property}': ${ex.message}`);

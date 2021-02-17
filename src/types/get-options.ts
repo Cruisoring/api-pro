@@ -1,4 +1,4 @@
-import { NamedValueGetters } from 'value-getter';
+import { NamedValueGetters } from './value-getter';
 
 export interface GetOptions {
     // try to ignore case of the propertyName if true
