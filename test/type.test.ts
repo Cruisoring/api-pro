@@ -1,8 +1,18 @@
-import { TypeHelper } from "../src/helpers/type-helper";
+import { ObjectType, TypeHelper } from "../src/helpers/type-helper";
 import { LineItemArrayMappings } from "./models/order-item";
 import { SellerMappings } from "./models/seller";
 
 describe('tests of TypeHelper', () => {
+    it('test objectTypeOf()', () => {
+        expect(TypeHelper.objectTypeOf(123)).toEqual(ObjectType.Number);
+        expect(TypeHelper.objectTypeOf('')).toEqual(ObjectType.String);
+        expect(TypeHelper.objectTypeOf('2013-02-55')).toEqual(ObjectType.Date);
+        expect(TypeHelper.objectTypeOf((x:number) => x+2)).toEqual(ObjectType.Function);
+        expect(TypeHelper.objectTypeOf({})).toEqual(ObjectType.Object);
+        expect(TypeHelper.objectTypeOf([])).toEqual(ObjectType.Array);
+        expect(TypeHelper.objectTypeOf([1, true])).toEqual(ObjectType.Array);
+    })
+
     it('test pick', () => {
         const rawData = {key1: 123, key2: 456, key3: 'abc'};
         const picked = TypeHelper.pick(rawData, 'key1', 'key3');
@@ -28,7 +38,7 @@ describe('tests of TypeHelper', () => {
         const arrayPrefixed = TypeHelper.withPrefix(
             {RootKey: 'items', SortKeys: 'name|-price|qty', name:'', price: 'unitPrice', qty:'quantity', note: 'note'}, 'order>products');
         expect(arrayPrefixed).toEqual({
-            RootKey: 'order>products>',
+            RootKey: 'order>products',
             SortKeys: 'name|-price|qty',
             name: '',
             price: 'unitPrice',

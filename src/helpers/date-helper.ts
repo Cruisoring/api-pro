@@ -41,9 +41,4 @@ export abstract class DateHelper {
         const parsedDate: Date = new Date(year, month - 1, day, hour, minute, second);
         return parsedDate;
     }
-
-    public static utcNow(): string {
-        const now: Date = new Date();
-        return now.toUTCString();
-    }
 }

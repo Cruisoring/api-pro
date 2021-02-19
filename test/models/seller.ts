@@ -1,3 +1,4 @@
+import { TypeHelper } from '../../src/helpers/type-helper';
 import { Mappings } from '../../src/types/mappings';
 import { AddressRaw, AddressMappings, Address } from './address';
 
@@ -24,5 +25,5 @@ export const SellerMappings: Mappings<Seller> = {
     manager: 'manager_name',
     sales_email: '',
     phones: 'sales & support & emergency',
-    company_address: AddressMappings,
+    company_address: TypeHelper.withPrefix(AddressMappings, 'company_address > '),
 };

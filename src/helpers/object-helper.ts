@@ -2,6 +2,7 @@ import { GetOptions } from '../types/get-options';
 import { AscendingSortIndictor, DescendingSortIndictor } from '../types/mappings';
 import { NamedValueGetters, ValueGetter } from '../types/value-getter';
 import { DateHelper } from './date-helper';
+import { NumberHelper } from './number-helper';
 import { ObjectType, TypeHelper } from './type-helper';
 
 export abstract class ObjectHelper {
@@ -10,6 +11,8 @@ export abstract class ObjectHelper {
     public static ThrowWhenFailed: boolean = false;
     public static FailedMessageHead: string = 'Failed with: ';
     public static NamedValueGetters: NamedValueGetters = {};
+    public static NumberToFixed: boolean = true;
+    public static DigitsOfNumber: number = 2;
 
     public static getDefaultGetOptions(): GetOptions {
         return {
@@ -23,6 +26,10 @@ export abstract class ObjectHelper {
             failedMessageHead: ObjectHelper.FailedMessageHead,
             // named functions with signature: (source: any, ...args: any[]) => any
             namedValueGetters: ObjectHelper.NamedValueGetters,
+            // keep fixed number of digits for any numbers if True
+            keepNumberToFixed: ObjectHelper.NumberToFixed,
+            // digits of number to keep
+            digitsOfNumber: ObjectHelper.DigitsOfNumber,
         };
     }
 
@@ -248,6 +255,12 @@ export abstract class ObjectHelper {
                 throw ex;
             }
         }
-        return current;
+
+        // convert the value to unformed format if needed
+        if (TypeHelper.objectTypeOf(current) == ObjectType.Number && options.keepNumberToFixed) {
+            return NumberHelper.round(current, options.digitsOfNumber);
+        } else {
+            return current;
+        }
     }
 }

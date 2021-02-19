@@ -1,3 +1,4 @@
+import { TypeHelper } from '../../src/helpers/type-helper';
 import { Mappings } from '../../src/types/mappings';
 import { Gender } from '../enums/gender';
 import { AddressRaw, AddressMappings, Address } from './address';
@@ -31,5 +32,5 @@ export const CustomerMappings: Mappings<Customer> = {
     gender: '',
     email: '',
     phone: 'mobile | workphone | homephone',
-    address: AddressMappings,
+    address: TypeHelper.withPrefix(AddressMappings, 'address >'),
 }

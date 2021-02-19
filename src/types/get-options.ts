@@ -11,4 +11,8 @@ export interface GetOptions {
     failedMessageHead: string;
     // named functions with signature: (source: any, ...args: any[]) => any
     namedValueGetters: NamedValueGetters;
+    // keep fixed number of digits for any numbers if True
+    keepNumberToFixed: boolean;
+    // digits of number to keep
+    digitsOfNumber: number;
 }

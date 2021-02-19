@@ -1,6 +1,12 @@
 import { Converter } from '../src/helpers/converter';
-import { OrderRaw, Order, OrderMappings } from './models/order';
-import {} from './data/order-data'
+import {
+    OrderRaw,
+    Order,
+    OrderMappings,
+    LegacyOrderMappings as LegacyOrderMappings,
+    LegacyOrder as LegacyOrder,
+} from './models/order';
+import {} from './data/order-data';
 import { Gender } from './enums/gender';
 import { State } from './enums/state';
 import { CustomerRaw } from './models/customer';
@@ -73,16 +79,24 @@ const companies: SellerRaw[] = [
 ];
 
 const products: ProductRaw[] = [
-    {title: 'apple', price: 1.2, kind: 'Veg', description: 'big red', producer: 'appFarm', note: 'low stock', isGstFree: false},
-    {title: 'banana', price: 2.99, kind: 'Veg', producer: 'appFarm', note: 'yummy', isGstFree: false},
-    {title: 'milk', price: 4, kind: 'Dairy', description: '3L', isGstFree: true},
-    {title: 'juice', price: 5.2, kind: 'Drink', description: 'orange', producer: 'Juicer', isGstFree: false},
-    {title: 'cookie', price: 3.49, kind: 'Food', isGstFree: false},
-    {title: 'bread', price: 2.9, kind: 'Food', description: 'with nuts', isGstFree: false},
-]
+    {
+        title: 'apple',
+        price: 1.2,
+        kind: 'Veg',
+        description: 'big red',
+        producer: 'appFarm',
+        note: 'low stock',
+        isGstFree: false,
+    },
+    { title: 'banana', price: 2.99, kind: 'Veg', producer: 'appFarm', note: 'yummy', isGstFree: false },
+    { title: 'milk', price: 4, kind: 'Dairy', description: '3L', isGstFree: true },
+    { title: 'juice', price: 5.2, kind: 'Drink', description: 'orange', producer: 'Juicer', isGstFree: false },
+    { title: 'cookie', price: 3.49, kind: 'Food', isGstFree: false },
+    { title: 'bread', price: 2.9, kind: 'Food', description: 'with nuts', isGstFree: false },
+];
 
 const orderedItems: OrderItemRaw[] = [
-    { product: products[0], quantity: 2, totalPrice: 2.4 }, 
+    { product: products[0], quantity: 2, totalPrice: 2.4 },
     { product: products[1], quantity: 1, totalPrice: 2.99 },
     { product: products[2], quantity: 3, totalPrice: 12 },
     { product: products[3], quantity: 1, totalPrice: 5.2 },
@@ -90,22 +104,52 @@ const orderedItems: OrderItemRaw[] = [
     { product: products[5], quantity: 3, totalPrice: 8.7 },
 ];
 
+const cancelledItems: OrderItemRaw[] = [
+    { product: products[0], quantity: -1, totalPrice: -1.2 },
+    { product: products[1], quantity: -1, totalPrice: -2.99 },
+    { product: products[2], quantity: -2, totalPrice: -8 },
+    { product: products[5], quantity: -1, totalPrice: -2.9 },
+];
+
 const rawOrder: OrderRaw = {
     seller: companies[0],
     customer: customers[0],
     datePlaced: '2021-02-15',
     items: orderedItems,
+    cancelled: cancelledItems,
     total: 38.27,
 };
 //#endregion
 
 describe('test converter with mock order data', () => {
+    test('print LegacyOrderMappings', () => {
+        console.dir(JSON.stringify(LegacyOrderMappings, null, 4));
+    });
+
+    test('test convert with LegacyOderMappings', () => {
+        const converter: Converter<LegacyOrder> = new Converter(LegacyOrderMappings, {
+            namedValueGetters: {
+                getProductGst: (product: any) => product.totalPrice * 0.1,
+                calculateTotal: (order: any) =>
+                    [...order.items, ...order.cancelled].map((item) => item.totalPrice).reduce((sm, p) => sm + p, 0),
+            },
+        });
+        const orderConverted = converter.convert(rawOrder);
+        console.dir(JSON.stringify(orderConverted, null, 4));
+    });
+
     test('print OrderMappings', () => {
         console.dir(JSON.stringify(OrderMappings, null, 4));
     });
 
-    test('test normal', () => {
-        const converter: Converter<Order> = new Converter(OrderMappings);
+    test('test convert tiwh OderMappings', () => {
+        const converter: Converter<Order> = new Converter(OrderMappings, {
+            namedValueGetters: {
+                getProductGst: (product: any) => product.totalPrice * 0.1,
+                calculateTotal: (order: any) =>
+                    [...order.items, ...order.cancelled].map((item) => item.totalPrice).reduce((sm, p) => sm + p, 0),
+            },
+        });
         const orderConverted = converter.convert(rawOrder);
         console.dir(JSON.stringify(orderConverted, null, 4));
     });

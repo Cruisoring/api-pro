@@ -29,8 +29,8 @@ export interface LineItem {
 }
 
 export const LineItemArrayMappings: ArrayMappings<LineItem> = {
-    RootKey: 'Items',   // RootKey to specify key of the element array
-    SortKeys: 'name | -unitPrice | total', // Sort elements by name first, unitPrice desc next, finally total
+    RootKey: 'Items & cancelled', // RootKey to specify key of the element array
+    SortKeys: 'name | -total', // Sort elements by name first, unitPrice desc next, finally total
 
     name: 'product > title | name',
     unitPrice: 'product > price',
@@ -39,4 +39,4 @@ export const LineItemArrayMappings: ArrayMappings<LineItem> = {
     number: 'quantity',
     total: 'totalPrice | total',
     gst: 'getProductGst()',
-}
+};

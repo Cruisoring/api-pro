@@ -1,4 +1,4 @@
-import { ArrayKeysTokens, ArrayMappings, isArrayMappings, Mappings } from '../types/mappings';
+import { ArrayKeys, ArrayKeysTokens, ArrayMappings, isArrayMappings, Mappings } from '../types/mappings';
 import { DateHelper } from './date-helper';
 import { ObjectHelper } from './object-helper';
 
@@ -82,6 +82,11 @@ export abstract class TypeHelper {
         return copy;
     }
 
+    public static updateArrayKeys<T>(mappings: ArrayMappings<T>, keys: Partial<ArrayKeys>): ArrayMappings<T> {
+        const updatedArrayMappings: ArrayMappings<T> = { ...mappings, ...keys };
+        return updatedArrayMappings;
+    }
+
     /**
      * If input Mappings<T> is an ArrayMappings<T>, use the prefix as the RootKey directly,
      *      otherwise, build a new Mappigns of type T with prefixed leading paths of the elements.
@@ -90,19 +95,16 @@ export abstract class TypeHelper {
      */
     public static withPrefix<T>(mappings: Mappings<T>, prefix: string): Mappings<T> {
         prefix = prefix.trim();
-        const leading: string = prefix.endsWith(ObjectHelper.PathConnector)
-            ? prefix
-            : prefix + ObjectHelper.PathConnector;
-        if (leading.length == 1) {
+        if (prefix.length == 0) {
             // no prefix, return original mappings directly
             return mappings;
         } else if (isArrayMappings(mappings)) {
-            // only ned to update RootKey with leading prefix
-            const updatedArrayMappings: ArrayMappings<T> = { ...mappings };
-            updatedArrayMappings.RootKey = leading;
-            return updatedArrayMappings;
+            return this.updateArrayKeys(mappings, {RootKey: prefix, });
         }
 
+        const leading: string = prefix.endsWith(ObjectHelper.PathConnector)
+            ? prefix
+            : prefix + ObjectHelper.PathConnector;
         const result: Mappings<T> = {} as Mappings<T>;
         const keys: string[] = Object.keys(mappings);
         const arrayKeysTokens: string[] = [...ArrayKeysTokens];
