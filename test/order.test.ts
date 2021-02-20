@@ -12,6 +12,7 @@ import { State } from './enums/state';
 import { CustomerRaw } from './models/customer';
 import { ProductRaw, OrderItemRaw } from './models/order-item';
 import { SellerRaw } from './models/seller';
+import { FileHelper } from '../src/helpers/file-helper';
 
 //#region raw order data
 const customers: CustomerRaw[] = [
@@ -123,34 +124,43 @@ const rawOrder: OrderRaw = {
 
 describe('test converter with mock order data', () => {
     test('print LegacyOrderMappings', () => {
-        console.dir(JSON.stringify(LegacyOrderMappings, null, 4));
+        // console.dir(JSON.stringify(LegacyOrderMappings, null, 4));
+        FileHelper.saveText('LegacyOrderMappings.json', LegacyOrderMappings);
     });
 
     test('test convert with LegacyOderMappings', () => {
         const converter: Converter<LegacyOrder> = new Converter(LegacyOrderMappings, {
             namedValueGetters: {
-                getProductGst: (product: any) => product.totalPrice * 0.1,
+                getProductGst: (item: any) => 
+                    item.product.isGstFree ? 0 : item.totalPrice * 0.1,
                 calculateTotal: (order: any) =>
                     [...order.items, ...order.cancelled].map((item) => item.totalPrice).reduce((sm, p) => sm + p, 0),
             },
         });
         const orderConverted = converter.convert(rawOrder);
-        console.dir(JSON.stringify(orderConverted, null, 4));
+        // console.dir(JSON.stringify(orderConverted, null, 4));
+        FileHelper.saveText('LegacyOrder.json', orderConverted);
     });
 
     test('print OrderMappings', () => {
-        console.dir(JSON.stringify(OrderMappings, null, 4));
+        // console.dir(JSON.stringify(OrderMappings, null, 4));
+        FileHelper.saveText('NewOrderMappings.json', OrderMappings);
     });
 
     test('test convert tiwh OderMappings', () => {
         const converter: Converter<Order> = new Converter(OrderMappings, {
             namedValueGetters: {
-                getProductGst: (product: any) => product.totalPrice * 0.1,
+                getProductGst: (item: any) => (item.product.isGstFree ? 0 : item.totalPrice * 0.1),
                 calculateTotal: (order: any) =>
-                    [...order.items, ...order.cancelled].map((item) => item.totalPrice).reduce((sm, p) => sm + p, 0),
+                    [...order.items, ...order.cancelled].map((p) => p.totalPrice).reduce((sm, p) => sm + p, 0),
+                calculateGst: (order: any) =>
+                    [...order.items, ...order.cancelled]
+                        .map((p) => (p.product.isGstFree ? 0 : p.totalPrice * 0.1))
+                        .reduce((sm, p) => sm + p, 0),
             },
         });
         const orderConverted = converter.convert(rawOrder);
-        console.dir(JSON.stringify(orderConverted, null, 4));
+        // console.dir(JSON.stringify(orderConverted, null, 4));
+        FileHelper.saveText('NewOrder.json', orderConverted);
     });
 });

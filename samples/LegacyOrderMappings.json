@@ -1,0 +1,62 @@
+{
+    "vender": {
+        "company": "seller >company_name",
+        "manager": "seller >manager_name",
+        "sales_email": "seller >",
+        "phones": "seller >sales & support & emergency",
+        "company_address": {
+            "address1": "seller >company_address >addressLine1 | address1",
+            "address2": "seller >company_address >addressLine2 | address2",
+            "address3": "seller >company_address >addressLine3 | address3",
+            "suburb": "seller >company_address >",
+            "state": "seller >company_address >",
+            "postCode": "seller >company_address >",
+            "country": "seller >company_address >"
+        }
+    },
+    "consumer": {
+        "firstName": "customer >first_name",
+        "lastName": "customer >last_name",
+        "age": "customer >",
+        "gender": "customer >",
+        "email": "customer >",
+        "phone": "customer >mobile | workphone | homephone",
+        "address": {
+            "address1": "customer >address >addressLine1 | address1",
+            "address2": "customer >address >addressLine2 | address2",
+            "address3": "customer >address >addressLine3 | address3",
+            "suburb": "customer >address >",
+            "state": "customer >address >",
+            "postCode": "customer >address >",
+            "country": "customer >address >"
+        }
+    },
+    "orderDate": "datePlaced",
+    "orderItems": [
+        {
+            "RootKey": "items",
+            "SortKeys": "name | -total",
+            "name": "product > title | name",
+            "unitPrice": "product > price",
+            "category": "product > kind",
+            "description": "product > discription | producer | note",
+            "number": "quantity",
+            "total": "totalPrice | total",
+            "gst": "getProductGst()"
+        }
+    ],
+    "cancelled": [
+        {
+            "RootKey": "cancelled",
+            "SortKeys": "name | -total",
+            "name": "product > title | name",
+            "unitPrice": "product > price",
+            "category": "product > kind",
+            "description": "product > discription | producer | note",
+            "number": "quantity",
+            "total": "totalPrice | total",
+            "gst": "getProductGst()"
+        }
+    ],
+    "total": "calculateTotal()"
+}

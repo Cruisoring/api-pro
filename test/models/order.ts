@@ -36,6 +36,7 @@ export type Order = Seller &
         date: string;
         items: LineItem[];
         total: number;
+        totalGst: number;
     };
 
 export const OrderMappings: Mappings<Order> = {
@@ -44,4 +45,5 @@ export const OrderMappings: Mappings<Order> = {
     date: 'datePlaced',
     items: [LineItemArrayMappings],
     total: 'calculateTotal()',
+    totalGst: 'calculateGst()',
 };

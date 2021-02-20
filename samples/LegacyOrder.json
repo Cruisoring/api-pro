@@ -1,0 +1,124 @@
+{
+    "vender": {
+        "company": "Abc company",
+        "manager": "Clark Dell",
+        "sales_email": "abc@email.com",
+        "phones": [
+            "14ABCD",
+            123456
+        ],
+        "company_address": {
+            "address1": "123 Grand St",
+            "suburb": "Brisbane",
+            "state": "QLD",
+            "postCode": 4000,
+            "country": "Australia"
+        }
+    },
+    "consumer": {
+        "firstName": "Tom",
+        "lastName": "Wilson",
+        "age": 23,
+        "gender": "Male",
+        "email": "tom@gmail.com",
+        "phone": "0432883092",
+        "address": {
+            "address1": "12 Bluelake St",
+            "suburb": "Roseberry",
+            "state": "QLD",
+            "postCode": 4023,
+            "country": "Australia"
+        }
+    },
+    "orderDate": "2021-02-15",
+    "orderItems": [
+        {
+            "name": "apple",
+            "unitPrice": 1.2,
+            "category": "Veg",
+            "description": "appFarm",
+            "number": 2,
+            "total": 2.4,
+            "gst": 0.24
+        },
+        {
+            "name": "banana",
+            "unitPrice": 2.99,
+            "category": "Veg",
+            "description": "appFarm",
+            "number": 1,
+            "total": 2.99,
+            "gst": 0.3
+        },
+        {
+            "name": "bread",
+            "unitPrice": 2.9,
+            "category": "Food",
+            "number": 3,
+            "total": 8.7,
+            "gst": 0.87
+        },
+        {
+            "name": "cookie",
+            "unitPrice": 3.49,
+            "category": "Food",
+            "number": 2,
+            "total": 6.98,
+            "gst": 0.7
+        },
+        {
+            "name": "juice",
+            "unitPrice": 5.2,
+            "category": "Drink",
+            "description": "Juicer",
+            "number": 1,
+            "total": 5.2,
+            "gst": 0.52
+        },
+        {
+            "name": "milk",
+            "unitPrice": 4,
+            "category": "Dairy",
+            "number": 3,
+            "total": 12,
+            "gst": 0
+        }
+    ],
+    "cancelled": [
+        {
+            "name": "apple",
+            "unitPrice": 1.2,
+            "category": "Veg",
+            "description": "appFarm",
+            "number": -1,
+            "total": -1.2,
+            "gst": -0.12
+        },
+        {
+            "name": "banana",
+            "unitPrice": 2.99,
+            "category": "Veg",
+            "description": "appFarm",
+            "number": -1,
+            "total": -2.99,
+            "gst": -0.3
+        },
+        {
+            "name": "bread",
+            "unitPrice": 2.9,
+            "category": "Food",
+            "number": -1,
+            "total": -2.9,
+            "gst": -0.29
+        },
+        {
+            "name": "milk",
+            "unitPrice": 4,
+            "category": "Dairy",
+            "number": -2,
+            "total": -8,
+            "gst": 0
+        }
+    ],
+    "total": 23.18
+}
