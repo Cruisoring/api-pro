@@ -1,4 +1,4 @@
-import {NumberHelper} from '../src/helpers/number-helper';
+import { NumberHelper } from '../src/helpers/number-helper';
 
 describe('test NumberHelper', () => {
     it('test getFactorOfDigits()', () => {
@@ -29,4 +29,4 @@ describe('test NumberHelper', () => {
         expect(NumberHelper.round(-10.253237, 1)).toEqual(-10.3);
         expect(NumberHelper.round(0.2332323, 5)).toEqual(0.23323);
     });
-})
+});

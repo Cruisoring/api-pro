@@ -6,13 +6,13 @@ import { NumberHelper } from './number-helper';
 import { ObjectType, TypeHelper } from './type-helper';
 
 export abstract class ObjectHelper {
-    public static PropertyNameCaseIgnored: boolean = true;
-    public static ReturnUndefinedIfMissing: boolean = true;
-    public static ThrowWhenFailed: boolean = false;
-    public static FailedMessageHead: string = 'Failed with: ';
+    public static PropertyNameCaseIgnored = true;
+    public static ReturnUndefinedIfMissing = true;
+    public static ThrowWhenFailed = false;
+    public static FailedMessageHead = 'Failed with: ';
     public static NamedValueGetters: NamedValueGetters = {};
-    public static NumberToFixed: boolean = true;
-    public static DigitsOfNumber: number = 2;
+    public static NumberToFixed = true;
+    public static DigitsOfNumber = 2;
 
     public static getDefaultGetOptions(): GetOptions {
         return {
@@ -52,8 +52,8 @@ export abstract class ObjectHelper {
     }
 
     public static compareMultiple(e1: any, e2: any, ...sortKeys: string[]): number {
-        let result: number = 0;
-        let descSorting: boolean = false;
+        let result = 0;
+        let descSorting = false;
         for (const key of sortKeys) {
             descSorting = key.startsWith(DescendingSortIndictor);
             const valueKey = descSorting || key.startsWith(AscendingSortIndictor) ? key.substring(1) : key;
@@ -91,7 +91,7 @@ export abstract class ObjectHelper {
     }
     //#endregion
 
-    public static valuePathsOf(source: any, path: string = ''): string[] {
+    public static valuePathsOf(source: any, path = ''): string[] {
         const keys: string[] = [...Object.keys(source)];
         const results: string[] = [];
         for (const key of keys) {
@@ -110,9 +110,9 @@ export abstract class ObjectHelper {
     public static valueByPropertyIgnoreCase(
         data: any,
         propertyName: string,
-        returnUndefinedIfMissing: boolean = true,
-        throwWhenFailed: boolean = true,
-        failedMessageHead: string = '',
+        returnUndefinedIfMissing = true,
+        throwWhenFailed = true,
+        failedMessageHead = '',
     ): any {
         const lowerName: string = propertyName.trim().toLowerCase();
         const matchedProperties: string[] = Object.keys(data).filter((k) => k.toLowerCase() == lowerName);
@@ -151,7 +151,7 @@ export abstract class ObjectHelper {
         options = options ?? ObjectHelper.getDefaultGetOptions();
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map((f) => f.trim());
         let current: any = source;
-        for (let fragment of fragments) {
+        for (const fragment of fragments) {
             try {
                 if (current === null) {
                     // stop searching when current is null, return null immediately

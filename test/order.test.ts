@@ -131,8 +131,7 @@ describe('test converter with mock order data', () => {
     test('test convert with LegacyOderMappings', () => {
         const converter: Converter<LegacyOrder> = new Converter(LegacyOrderMappings, {
             namedValueGetters: {
-                getProductGst: (item: any) => 
-                    item.product.isGstFree ? 0 : item.totalPrice * 0.1,
+                getProductGst: (item: any) => (item.product.isGstFree ? 0 : item.totalPrice * 0.1),
                 calculateTotal: (order: any) =>
                     [...order.items, ...order.cancelled].map((item) => item.totalPrice).reduce((sm, p) => sm + p, 0),
             },

@@ -69,20 +69,27 @@ const companies: SellerRaw[] = [
 ];
 
 const products: ProductRaw[] = [
-    {title: 'apple', price: 1.2, kind: 'Veg', description: 'big red', producer: 'appFarm', note: 'low stock', isGstFree: false},
-    {title: 'banana', price: 2.99, kind: 'Veg', producer: 'appFarm', note: 'yummy', isGstFree: false},
-    {title: 'milk', price: 4, kind: 'Dairy', description: '3L', isGstFree: true},
-    {title: 'juice', price: 5.2, kind: 'Drink', description: 'orange', producer: 'Juicer', isGstFree: false},
-    {title: 'cookie', price: 3.49, kind: 'Food', isGstFree: false},
-    {title: 'bread', price: 2.9, kind: 'Food', description: 'with nuts', isGstFree: false},
-]
-
-const orderedItems: OrderItemRaw[] = [
-    { product: products[0], quantity: 2, totalPrice: 2.4 }, 
-    { product: products[1], quantity: 1, totalPrice: 2.99 }
-    { product: products[2], quantity: 3, totalPrice: 12 }
-    { product: products[3], quantity: 1, totalPrice: 5.2 }
-    { product: products[4], quantity: 2, totalPrice: 6.98 }
-    { product: products[5], quantity: 3, totalPrice: 8.7 }
+    {
+        title: 'apple',
+        price: 1.2,
+        kind: 'Veg',
+        description: 'big red',
+        producer: 'appFarm',
+        note: 'low stock',
+        isGstFree: false,
+    },
+    { title: 'banana', price: 2.99, kind: 'Veg', producer: 'appFarm', note: 'yummy', isGstFree: false },
+    { title: 'milk', price: 4, kind: 'Dairy', description: '3L', isGstFree: true },
+    { title: 'juice', price: 5.2, kind: 'Drink', description: 'orange', producer: 'Juicer', isGstFree: false },
+    { title: 'cookie', price: 3.49, kind: 'Food', isGstFree: false },
+    { title: 'bread', price: 2.9, kind: 'Food', description: 'with nuts', isGstFree: false },
 ];
 
+const orderedItems: OrderItemRaw[] = [
+    { product: products[0], quantity: 2, totalPrice: 2.4 },
+    { product: products[1], quantity: 1, totalPrice: 2.99 },
+    { product: products[2], quantity: 3, totalPrice: 12 },
+    { product: products[3], quantity: 1, totalPrice: 5.2 },
+    { product: products[4], quantity: 2, totalPrice: 6.98 },
+    { product: products[5], quantity: 3, totalPrice: 8.7 },
+];

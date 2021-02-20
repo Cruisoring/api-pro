@@ -26,8 +26,8 @@ export const LegacyOrderMappings: Mappings<LegacyOrder> = {
     vender: TypeHelper.withPrefix(SellerMappings, 'seller > '),
     consumer: TypeHelper.withPrefix(CustomerMappings, 'customer > '),
     orderDate: 'datePlaced',
-    orderItems: [TypeHelper.updateArrayKeys(LineItemArrayMappings, {RootKey: 'items'})],
-    cancelled: [TypeHelper.updateArrayKeys(LineItemArrayMappings, {RootKey: 'cancelled'})],
+    orderItems: [TypeHelper.updateArrayKeys(LineItemArrayMappings, { RootKey: 'items' })],
+    cancelled: [TypeHelper.updateArrayKeys(LineItemArrayMappings, { RootKey: 'cancelled' })],
     total: 'calculateTotal()',
 };
 

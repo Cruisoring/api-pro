@@ -42,5 +42,5 @@
         }
     ],
     "total": "calculateTotal()",
-    "gst": "calculateGst()"
+    "totalGst": "calculateGst()"
 }

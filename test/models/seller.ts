@@ -16,7 +16,7 @@ export interface Seller {
     company: string;
     manager?: string;
     sales_email: string;
-    phones: (string|number)[];
+    phones: (string | number)[];
     company_address: Address;
 }
 

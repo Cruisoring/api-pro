@@ -91,6 +91,6 @@ describe('Converter test', () => {
     //         'banana',
     //         'pencil',
     //         'nice looking ruler',
-    //     ]);        
+    //     ]);
     // })
 });

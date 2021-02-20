@@ -99,7 +99,7 @@ export abstract class TypeHelper {
             // no prefix, return original mappings directly
             return mappings;
         } else if (isArrayMappings(mappings)) {
-            return this.updateArrayKeys(mappings, {RootKey: prefix, });
+            return this.updateArrayKeys(mappings, { RootKey: prefix });
         }
 
         const leading: string = prefix.endsWith(ObjectHelper.PathConnector)

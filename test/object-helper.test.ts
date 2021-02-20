@@ -1,5 +1,5 @@
 import { ObjectHelper } from '../src/helpers/object-helper';
-import {customer, orders, cancelled, rawData} from './data/data';
+import { customer, orders, cancelled, rawData } from './data/data';
 
 describe('Test sorting', () => {
     test('sort orders by gst', (): void => {
@@ -61,7 +61,7 @@ describe('Test ObjectHelper with default configs', () => {
     });
 
     test('test getValue() with orConnector', () => {
-        const data = {item: 'apple', description: 'red big', note: '$1.1/per'}
+        const data = { item: 'apple', description: 'red big', note: '$1.1/per' };
         let info = ObjectHelper.getValue(data, 'info | DESC | Description | note');
         expect(info).toEqual('red big');
         info = ObjectHelper.getValue(data, ' infomation | DESC ');
@@ -93,9 +93,13 @@ describe('Test ObjectHelper with default configs', () => {
                 items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
         };
 
-        const totalAmount = ObjectHelper.getValueWithOptions(rawData, `purchased & cancelled > total(${discount}, ${credit})`, {
-            namedValueGetters: getters,
-        });
+        const totalAmount = ObjectHelper.getValueWithOptions(
+            rawData,
+            `purchased & cancelled > total(${discount}, ${credit})`,
+            {
+                namedValueGetters: getters,
+            },
+        );
         expect(totalAmount.toFixed(2)).toEqual('12.20');
     });
 });

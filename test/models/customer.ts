@@ -33,4 +33,4 @@ export const CustomerMappings: Mappings<Customer> = {
     email: '',
     phone: 'mobile | workphone | homephone',
     address: TypeHelper.withPrefix(AddressMappings, 'address >'),
-}
+};
