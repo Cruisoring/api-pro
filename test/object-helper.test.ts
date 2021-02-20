@@ -89,8 +89,9 @@ describe('Test ObjectHelper with default configs', () => {
         const credit: number = ObjectHelper.getValue(rawData, 'customer>credit') ?? 0;
         const getters = {
             //function to sum totalWithGst then multiple discount in percentages then minus credit
-            total: (items: any[], disc: any, credit: any) =>
-                items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
+            total: (items: any[], _: any, disc: any, credit: any) =>
+                items.reduce((total, item) => 
+                    total + item.totalWithGst, 0) * disc - credit,
         };
 
         const totalAmount = ObjectHelper.getValueWithOptions(

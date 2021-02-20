@@ -1,18 +1,18 @@
-import { GetOptions } from '../types/get-options';
+import { ConvertOptions } from '../types/convert-options';
 import { ArrayKeysTokens, ArrayMappings, Mappings, SortKeySeparator } from '../types/mappings';
 import { ObjectHelper } from './object-helper';
 import { TypeHelper } from './type-helper';
 
 export class Converter<T> {
-    readonly options: GetOptions;
+    readonly options: ConvertOptions;
     readonly mappings: Mappings<T>;
 
-    constructor(mappings: Mappings<T>, options: Partial<GetOptions> = {}) {
+    constructor(mappings: Mappings<T>, options: Partial<ConvertOptions> = {}) {
         options.namedValueGetters = {
-            ...ObjectHelper.getDefaultGetOptions().namedValueGetters,
+            ...ObjectHelper.getDefaultConvertOptions().namedValueGetters,
             ...options.namedValueGetters,
         };
-        this.options = { ...ObjectHelper.getDefaultGetOptions(), ...options };
+        this.options = { ...ObjectHelper.getDefaultConvertOptions(), ...options };
         this.mappings = mappings;
     }
 
@@ -21,7 +21,7 @@ export class Converter<T> {
         return result;
     }
 
-    public static convert<T>(source: any, mappings: Mappings<T>, options: GetOptions, root: any = source): T {
+    public static convert<T>(source: any, mappings: Mappings<T>, options: ConvertOptions, root: any = source): T {
         if (source === null || undefined) {
             throw new TypeError(`Cannot extract values from null or undefined`);
         }

@@ -1,4 +1,5 @@
-import { GetOptions } from '../types/get-options';
+import { ValueFormatter } from '../types/value-formatter';
+import { ConvertOptions } from '../types/convert-options';
 import { AscendingSortIndictor, DescendingSortIndictor } from '../types/mappings';
 import { NamedValueGetters, ValueGetter } from '../types/value-getter';
 import { DateHelper } from './date-helper';
@@ -6,15 +7,29 @@ import { NumberHelper } from './number-helper';
 import { ObjectType, TypeHelper } from './type-helper';
 
 export abstract class ObjectHelper {
+    public static readonly RootIndicator: string = '$';
+    public static readonly PathConnector: string = '>';
+    public static readonly FunctionIndicator: string = '()';
+    public static readonly AndConnector: string = '&'; // for array composed by all matched elements
+    public static readonly OrConnector: string = '|'; // for element matched first with any of the keys in order
+    public static readonly Missing: string = 'MISSING';
+
+    public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)?\[\s*(?<index>\d+)\s*\]\s*$/;
+    public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^)]*)\)\s*$/;
+
     public static PropertyNameCaseIgnored = true;
     public static ReturnUndefinedIfMissing = true;
     public static ThrowWhenFailed = false;
     public static FailedMessageHead = 'Failed with: ';
     public static NamedValueGetters: NamedValueGetters = {};
-    public static NumberToFixed = true;
+    public static FormatNumberValue = true;
     public static DigitsOfNumber = 2;
 
-    public static getDefaultGetOptions(): GetOptions {
+    public static readonly DefaultValueFormatters: { [valueType: string]: ValueFormatter } = {
+        Number: (v) => NumberHelper.round(v, ObjectHelper.DigitsOfNumber),
+    };
+
+    public static getDefaultConvertOptions(): ConvertOptions {
         return {
             // try to ignore case of the propertyName if true
             propertyNameCaseIgnored: ObjectHelper.PropertyNameCaseIgnored,
@@ -27,21 +42,11 @@ export abstract class ObjectHelper {
             // named functions with signature: (source: any, ...args: any[]) => any
             namedValueGetters: ObjectHelper.NamedValueGetters,
             // keep fixed number of digits for any numbers if True
-            keepNumberToFixed: ObjectHelper.NumberToFixed,
+            keepNumberToFixed: ObjectHelper.FormatNumberValue,
             // digits of number to keep
             digitsOfNumber: ObjectHelper.DigitsOfNumber,
         };
     }
-
-    public static readonly RootIndicator: string = '$';
-    public static readonly PathConnector: string = '>';
-    public static readonly FunctionIndicator: string = '()';
-    public static readonly AndConnector: string = '&'; // for array composed by all matched elements
-    public static readonly OrConnector: string = '|'; // for element matched first with any of the keys in order
-    public static readonly Missing: string = 'MISSING';
-
-    public static readonly ArrayIndexRegex: RegExp = /^(?<key>\S+)?\[\s*(?<index>\d+)\s*\]\s*$/;
-    public static readonly FunctionArgsRegex: RegExp = /^\s*(?<funcName>\S+)\((?<args>[^)]*)\)\s*$/;
 
     //#region Sorting relationed functions
     public static asSortedArray(rootArray: any, ...sortKeys: string[]): any[] {
@@ -133,22 +138,22 @@ export abstract class ObjectHelper {
         }
     }
 
-    public static getValueWithOptions(source: any, path: string, options: Partial<GetOptions> = {}): any {
+    public static getValueWithOptions(source: any, path: string, options: Partial<ConvertOptions> = {}): any {
         options.namedValueGetters = {
-            ...ObjectHelper.getDefaultGetOptions().namedValueGetters,
+            ...ObjectHelper.getDefaultConvertOptions().namedValueGetters,
             ...options.namedValueGetters,
         };
-        const mergedOptions: GetOptions = { ...ObjectHelper.getDefaultGetOptions(), ...options };
+        const mergedOptions: ConvertOptions = { ...ObjectHelper.getDefaultConvertOptions(), ...options };
         return this.getValue(source, path, mergedOptions);
     }
 
     public static getValue(
         source: any,
         path: string,
-        options: GetOptions | undefined = undefined,
+        options: ConvertOptions | undefined = undefined,
         root: any = source,
     ): any {
-        options = options ?? ObjectHelper.getDefaultGetOptions();
+        options = options ?? ObjectHelper.getDefaultConvertOptions();
         const fragments: string[] = path.split(ObjectHelper.PathConnector).map((f) => f.trim());
         let current: any = source;
         for (const fragment of fragments) {
@@ -222,9 +227,9 @@ export abstract class ObjectHelper {
                             const args: string = match.groups!.args;
                             if (args.length != 0) {
                                 const actualArgs: any[] = eval(`[${args}]`);
-                                current = getter(current, ...actualArgs);
+                                current = getter(current, root, ...actualArgs);
                             } else {
-                                current = getter(current);
+                                current = getter(current, root);
                             }
                         } catch (ex) {
                             if (options.throwWhenFailed) {

@@ -1,6 +1,6 @@
 import { NamedValueGetters } from './value-getter';
 
-export interface GetOptions {
+export interface ConvertOptions {
     // try to ignore case of the propertyName if true
     propertyNameCaseIgnored: boolean;
     // undefined is returned if concerned property is missing when it is set to true:
