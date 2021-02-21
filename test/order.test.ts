@@ -13,6 +13,7 @@ import { CustomerRaw } from './models/customer';
 import { ProductRaw, OrderItemRaw } from './models/order-item';
 import { SellerRaw } from './models/seller';
 import { FileHelper } from '../src/helpers/file-helper';
+import { rawData } from './data/data';
 
 //#region raw order data
 const customers: CustomerRaw[] = [
@@ -118,14 +119,17 @@ const rawOrder: OrderRaw = {
     datePlaced: '2021-02-15',
     items: orderedItems,
     cancelled: cancelledItems,
-    total: 38.27,
 };
 //#endregion
 
 describe('test converter with mock order data', () => {
+    test('print rawOrder', () => {
+        FileHelper.saveText('RawOrder.json', rawOrder);
+    });
+
     test('print LegacyOrderMappings', () => {
-        // console.dir(JSON.stringify(LegacyOrderMappings, null, 4));
-        FileHelper.saveText('LegacyOrderMappings.json', LegacyOrderMappings);
+        console.dir(JSON.stringify(LegacyOrderMappings, null, 4));
+        // FileHelper.saveText('LegacyOrderMappings.json', LegacyOrderMappings);
     });
 
     test('test convert with LegacyOderMappings', () => {
@@ -137,8 +141,8 @@ describe('test converter with mock order data', () => {
             },
         });
         const orderConverted = converter.convert(rawOrder);
-        // console.dir(JSON.stringify(orderConverted, null, 4));
-        FileHelper.saveText('LegacyOrder.json', orderConverted);
+        console.dir(JSON.stringify(orderConverted, null, 4));
+        // FileHelper.saveText('LegacyOrder.json', orderConverted);
     });
 
     test('print OrderMappings', () => {

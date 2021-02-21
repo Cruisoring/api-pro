@@ -1,3 +1,4 @@
+import { Mappings, ArrayMappings } from '../src/types/mappings';
 import { ObjectHelper } from '../src/helpers/object-helper';
 import { customer, orders, cancelled, rawData } from './data/data';
 
@@ -90,8 +91,7 @@ describe('Test ObjectHelper with default configs', () => {
         const getters = {
             //function to sum totalWithGst then multiple discount in percentages then minus credit
             total: (items: any[], _: any, disc: any, credit: any) =>
-                items.reduce((total, item) => 
-                    total + item.totalWithGst, 0) * disc - credit,
+                items.reduce((total, item) => total + item.totalWithGst, 0) * disc - credit,
         };
 
         const totalAmount = ObjectHelper.getValueWithOptions(
@@ -102,6 +102,19 @@ describe('Test ObjectHelper with default configs', () => {
             },
         );
         expect(totalAmount.toFixed(2)).toEqual('12.20');
+    });
+
+    test('test simple demo data extraction', () => {
+        const data = {
+            purchased: [
+                { item: 'milk', price: 3.99, desc: 'yummy', gstFree: true },
+                { item: 'ruler', price: 1.2 },
+            ],
+            cancelled: [{ item: 'pencil', price: -0.2, note: 'note like the color' }],
+        };
+        expect(ObjectHelper.getValue(data, 'PURCHASED[1] > Price ')).toEqual(1.2);
+        expect(ObjectHelper.getValue(data, 'purchased & Cancelled > length')).toEqual(3);
+        expect(ObjectHelper.getValue(data, 'purchased & Cancelled > 1 > desc | note | item')).toEqual('ruler');
     });
 });
 

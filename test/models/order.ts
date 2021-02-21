@@ -10,7 +10,6 @@ export interface OrderRaw {
     datePlaced: string;
     items: OrderItemRaw[];
     cancelled: OrderItemRaw[];
-    total: number;
 }
 
 export type LegacyOrder = {

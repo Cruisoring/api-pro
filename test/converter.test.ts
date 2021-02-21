@@ -1,6 +1,7 @@
 import { ArrayMappings, Mappings } from '../src/types/mappings';
 import { Converter } from '../src/helpers/converter';
 import { customer, rawData } from './data/data';
+import { TypeHelper } from '../src/helpers/type-helper';
 
 interface profile {
     givenName: string;
@@ -50,13 +51,8 @@ const amountMappings: Mappings<amount> = {
     qty: '',
     gst: '',
     totalInclGst: '',
-    // totalWithoutGst = 'totalWithoutGst()',
 };
 
-// interface transaction {
-//     customer: profile;
-//     transactions:
-// }
 
 describe('Converter test', () => {
     test('test convert() with simplest mappings', () => {
@@ -80,17 +76,12 @@ describe('Converter test', () => {
         ]);
     });
 
-    // test('test convert() with array filter', () => {
-    //     const converter = new Converter(itemsMappings);
-    //     const products = converter.convert(rawData);
-    //     console.log(JSON.stringify(products));
-    //     expect(products.items.map((p) => p.desc)).toEqual([
-    //         'limited version',
-    //         'swiggle',
-    //         'wrong quantity entered',
-    //         'banana',
-    //         'pencil',
-    //         'nice looking ruler',
-    //     ]);
-    // })
+    test('test convert() with array filter', () => {
+        const withFilter ={ filtered: [TypeHelper.updateArrayKeys(itemArrayMappings, {
+            FilterLambda: "x => x.name == 'notebook'"})]};
+        const converter = new Converter(withFilter);
+        const filtered: any = converter.convert(rawData);
+        console.log(JSON.stringify(filtered));
+        expect(filtered.filtered.map((p: any) => p.desc)).toEqual(['swiggle', 'wrong quantity entered']);
+    })
 });
