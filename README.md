@@ -3,24 +3,21 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
+      <a href="#about">About</a>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#get-value-with-path">Get value with path</a></li>
+        <li><a href="#simple-examples">Simple examples</a></li>
+        <li><a href="#mappings">Mappings</a></li>
+        <li><a href="#arraymappings">ArrayMappings</a></li>
+        <li><a href="#managed-with-converter">Managed with Converter</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#more-thoughts">More thoughts</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
 
@@ -92,7 +89,7 @@ The table summarises special characters and their uses:
 | **()** | Indicator of function | funcName**()**: try to get value with function whose name is *funcName* |
 
 
-### Simple getValue() examples
+### Simple examples
 
 The simplest case with sample source data:
 ``` javascript
@@ -114,7 +111,7 @@ const data = {
 Both raw data and result data is usually organised as simple models, then grouped as arrays/lists, operating upon arrays with unknown length, capability of handling arrays is basic.
 
 
-### Mappings<T>
+### Mappings
 
 As we can define models as interface or type **T**, abstract means to get its values can be defined as **Mappings<T>**:
 > export type Mappings<T> = { [k in keyof T]: string | Mappings<T[k]> };
@@ -128,7 +125,7 @@ The restriction of its keys `[k in keyof T]` would result in compilation errors 
 As ![Warning of mismatched property](screenshots/Warning%20of%20mismatched%20property.png) shown, such compilation errors would be enough to alert inconsistence of the model changes!
 
 
-### ArrayMappings<TElement>
+### ArrayMappings
 
 To enable array processing, **ArrayKeys** can be merged with **Mappings<T>** to get **ArrayMapping<T>** as below:
 
@@ -151,7 +148,7 @@ The **FilterLambda** can be used to specify the lambda expression to filter the 
 
 
 
-### Managed with Converter<T>
+### Managed with Converter
 
 The [Converter<T>](src/helpers/converter.ts) is designed to not only keep the **Mappings<T>** that is used to instruct how to get each property from source data, but also mantain a set of options like:
 * If propertyName shall be case-sensitive or not. (default to be case-insensitive)
