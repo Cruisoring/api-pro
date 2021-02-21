@@ -150,7 +150,7 @@ describe('test converter with mock order data', () => {
         FileHelper.saveText('NewOrderMappings.json', OrderMappings);
     });
 
-    test('test convert tiwh OderMappings', () => {
+    test('test convert with OderMappings', () => {
         const converter: Converter<Order> = new Converter(OrderMappings, {
             namedValueGetters: {
                 getProductGst: (item: any) => (item.product.isGstFree ? 0 : item.totalPrice * 0.1),

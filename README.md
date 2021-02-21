@@ -13,6 +13,7 @@
         <li><a href="#mappings">Mappings</a></li>
         <li><a href="#arraymappings">ArrayMappings</a></li>
         <li><a href="#managed-with-converter">Managed with Converter</a></li>
+        <li><a href="#complex-model-composed-by-simple-ones">Complex model composed by simple ones</a></li>
       </ul>
     </li>
     <li><a href="#more-thoughts">More thoughts</a></li>
@@ -85,8 +86,8 @@ The table summarises special characters and their uses:
 | **>** | Splitter of paths | parent **>** child: get *parent* node of the source, then get its *child* node value |
 | **&** | Join element(s) of the nodes | opt1 **&** opt2: get both *opt1* node and *opt2* node values as an array |
 | **|** | Any element if presented | opt1 **|** opt2: value of *opt1* if presented, else value of *opt2* if presented |
-| **$** | Root element | **$**node: return *node* value of the root of the given source |
-| **()** | Indicator of function | funcName**()**: try to get value with function whose name is *funcName* |
+| **$** | Root element | $node: return *node* value of the root of the given source |
+| **()** | Indicator of function | funcName **()**: try to get value with function whose name is *funcName* |
 
 
 ### Simple examples
@@ -146,6 +147,63 @@ Within the **SortKeys**, **|** can be used to identify multiple sortKeys, **-** 
 
 The **FilterLambda** can be used to specify the lambda expression to filter the converted elements. Please refer [converter.test.ts](test/converter.test.ts) to see examples.
 
+
+### Complex model composed by simple ones
+
+The type system of TypeScript makes complex model derived from multiple simple models. For exmple, suppose the legacy API has defined composed model as:
+
+``` typescript
+export type LegacyOrder = {
+    vender: Seller;
+    consumer: Customer;
+    orderDate: string;
+    orderItems: LineItem[];
+    cancelled: LineItem[];
+    total: number;
+};
+```
+
+Converting to new model below can keep the simple models untouched:
+
+``` typescript
+export type Order = Seller &
+    Customer & {
+        date: string;
+        items: LineItem[];
+        total: number;
+        totalGst: number;
+    };
+```
+
+The new [**Order** type](test/models/order.ts) would get all properties of [**Seller*](test/models/seller.ts) and [**Customer**](test/models/customer.ts) included if they have no name conflictions along with other 4 new properties.
+
+Interestingly, the legacy Mappings of 
+
+``` typescript
+export const LegacyOrderMappings: Mappings<LegacyOrder> = {
+    vender: TypeHelper.withPrefix(SellerMappings, 'seller > '),
+    consumer: TypeHelper.withPrefix(CustomerMappings, 'customer > '),
+    orderDate: 'datePlaced',
+    orderItems: [TypeHelper.updateArrayKeys(LineItemArrayMappings, { RootKey: 'items' })],
+    cancelled: [TypeHelper.updateArrayKeys(LineItemArrayMappings, { RootKey: 'cancelled' })],
+    total: 'calculateTotal()',
+};
+```
+
+could be replaced by:
+
+``` typescript
+export const OrderMappings: Mappings<Order> = {
+    ...TypeHelper.withPrefix(SellerMappings, 'seller > '),
+    ...TypeHelper.withPrefix(CustomerMappings, 'customer > '),
+    date: 'datePlaced',
+    items: [LineItemArrayMappings],
+    total: 'calculateTotal()',
+    totalGst: 'calculateGst()',
+};
+```
+
+That means the Mappings of smaller models can be re-used with the **withPrefix()** and **updateArrayKeys()** help methods in [TypeHelper](src/helpers/type-helper.ts): both models and their Mappings can be treated as self-maintained blocks, transforming APIs is still limited within the result models and their Mappings only.
 
 
 ### Managed with Converter
